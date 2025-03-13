@@ -37,13 +37,13 @@ export function ThemeToggle() {
     <Button 
       variant="outline" 
       size="icon" 
-      className="rounded-full" 
+      className="rounded-full dark:bg-secondary dark:hover:bg-secondary/80" 
       onClick={toggleTheme}
     >
       {isDark ? (
-        <Moon className="h-[1.2rem] w-[1.2rem]" />
+        <Moon className="h-[1.2rem] w-[1.2rem] text-primary" />
       ) : (
-        <Sun className="h-[1.2rem] w-[1.2rem]" />
+        <Sun className="h-[1.2rem] w-[1.2rem] text-primary" />
       )}
       <span className="sr-only">Toggle theme</span>
     </Button>

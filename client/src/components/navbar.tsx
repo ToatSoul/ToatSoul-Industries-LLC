@@ -111,7 +111,7 @@ export default function Navbar() {
 
         {/* Mobile Menu */}
         {isMenuOpen && (
-          <div className="md:hidden border-t">
+          <div className="md:hidden border-t border-border">
             <div className="container mx-auto px-4 pt-2 pb-3 space-y-1">
               <Link href="/" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
                 Home
@@ -120,7 +120,7 @@ export default function Navbar() {
                 Forums
               </Link>
 
-              <div className="pt-4 border-t flex flex-col space-y-2">
+              <div className="pt-4 border-t border-border flex flex-col space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">Toggle Theme</span>
                   <ThemeToggle />
