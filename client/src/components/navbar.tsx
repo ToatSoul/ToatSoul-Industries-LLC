@@ -64,17 +64,19 @@ export default function Navbar() {
             <div className="hidden md:flex items-center space-x-2">
               {user ? (
                 <div className="flex items-center space-x-2">
-                  <Link href={`/profile/${user.id}`}>
-                    <Button variant="ghost" className="flex items-center space-x-2">
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.avatarUrl || ""} alt={user.username} />
-                        <AvatarFallback>
-                          {user.username.slice(0, 2).toUpperCase()}
-                        </AvatarFallback>
-                      </Avatar>
-                      <span>{user.username}</span>
-                    </Button>
-                  </Link>
+                  <Button 
+                    variant="ghost" 
+                    className="flex items-center space-x-2"
+                    onClick={() => window.location.href = `/profile/${user.id}`}
+                  >
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.avatarUrl || ""} alt={user.username} />
+                      <AvatarFallback>
+                        {user.username.slice(0, 2).toUpperCase()}
+                      </AvatarFallback>
+                    </Avatar>
+                    <span>{user.username}</span>
+                  </Button>
                   <Button variant="outline" size="sm" onClick={handleLogout}>
                     Sign out
                   </Button>
@@ -117,12 +119,17 @@ export default function Navbar() {
               <div className="pt-4 border-t">
                 {user ? (
                   <>
-                    <Link href={`/profile/${user.id}`} onClick={closeMenu}>
-                      <Button variant="ghost" className="w-full justify-start">
-                        <User className="mr-2 h-4 w-4" />
-                        Profile
-                      </Button>
-                    </Link>
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start"
+                      onClick={() => {
+                        closeMenu();
+                        window.location.href = `/profile/${user.id}`;
+                      }}
+                    >
+                      <User className="mr-2 h-4 w-4" />
+                      Profile
+                    </Button>
                     <Button
                       variant="ghost"
                       className="w-full justify-start text-red-500"
