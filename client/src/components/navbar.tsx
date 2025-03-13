@@ -120,17 +120,16 @@ export default function Navbar() {
               <div className="pt-4 border-t">
                 {user ? (
                   <>
-                    <Button 
-                      variant="ghost" 
-                      className="w-full justify-start"
-                      onClick={() => {
-                        closeMenu();
-                        window.location.href = `/profile/${user.id}`;
-                      }}
-                    >
-                      <User className="mr-2 h-4 w-4" />
-                      Profile
-                    </Button>
+                    <Link href={`/profile/${user.id}`}>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start"
+                        onClick={closeMenu}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Button>
+                    </Link>
                     <Button
                       variant="ghost"
                       className="w-full justify-start text-red-500"
