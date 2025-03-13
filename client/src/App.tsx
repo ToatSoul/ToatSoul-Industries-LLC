@@ -25,28 +25,6 @@ function Loading() {
   );
 }
 
-function Router() {
-  return (
-    <Suspense fallback={<Loading />}>
-      <div className="flex flex-col min-h-screen">
-        <Navbar />
-        <div className="flex-grow">
-          <Switch>
-            <Route path="/" component={Home} />
-            <Route path="/forums" component={Forums} />
-            <Route path="/forums/category/:categoryId" component={Forums} />
-            <Route path="/thread/:id" component={ThreadDetail} />
-            <Route path="/profile/:id" component={Profile} />
-            <Route path="/new-thread" component={NewThread} />
-            <Route component={NotFound} />
-          </Switch>
-        </div>
-        <Footer />
-      </div>
-    </Suspense>
-  );
-}
-
 function App() {
   return (
     <QueryClientProvider client={queryClient}>
@@ -54,7 +32,17 @@ function App() {
         <div className="min-h-screen flex flex-col">
           <Navbar />
           <div className="flex-grow">
-            <Router />
+            <Suspense fallback={<Loading />}>
+              <Switch>
+                <Route path="/" component={Home} />
+                <Route path="/forums" component={Forums} />
+                <Route path="/forums/category/:categoryId" component={Forums} />
+                <Route path="/thread/:id" component={ThreadDetail} />
+                <Route path="/profile/:id" component={Profile} />
+                <Route path="/new-thread" component={NewThread} />
+                <Route component={NotFound} />
+              </Switch>
+            </Suspense>
           </div>
           <Footer />
         </div>
