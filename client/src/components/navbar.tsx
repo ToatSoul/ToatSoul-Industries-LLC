@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Menu, X, User, LogOut } from "lucide-react";
 import AuthModal from "@/components/auth-modal";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -62,8 +63,10 @@ export default function Navbar() {
 
             {/* Desktop Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
+              <ThemeToggle />
+              
               {user ? (
-                <div className="flex items-center space-x-2">
+                <div className="flex items-center space-x-2 ml-2">
                   <Link href={`/profile/${user.id}`}>
                     <Button 
                       variant="ghost" 
@@ -83,7 +86,7 @@ export default function Navbar() {
                   </Button>
                 </div>
               ) : (
-                <div className="flex space-x-2">
+                <div className="flex space-x-2 ml-2">
                   <Button variant="ghost" size="sm" onClick={openLoginModal}>
                     Log in
                   </Button>
