@@ -11,11 +11,11 @@ export default function Footer() {
             </p>
           </div>
           <nav className="flex gap-6">
-            <Link href="/">
-              <a className="text-sm text-gray-600 hover:text-primary transition-colors">Home</a>
+            <Link href="/" className="text-sm text-gray-600 hover:text-primary transition-colors">
+              Home
             </Link>
-            <Link href="/forums">
-              <a className="text-sm text-gray-600 hover:text-primary transition-colors">Forums</a>
+            <Link href="/forums" className="text-sm text-gray-600 hover:text-primary transition-colors">
+              Forums
             </Link>
           </nav>
         </div>

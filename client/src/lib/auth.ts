@@ -1,6 +1,5 @@
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from "react";
-import { apiRequest } from "./queryClient";
 import { User, InsertUser } from "@shared/schema";
 
 interface AuthContextType {
@@ -19,7 +18,7 @@ interface AuthProviderProps {
 
 export function AuthProvider({ children }: AuthProviderProps) {
   const [user, setUser] = useState<Omit<User, "password"> | null>(null);
-  const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
     // Check if user is already logged in on initial load
@@ -44,22 +43,68 @@ export function AuthProvider({ children }: AuthProviderProps) {
   }, []);
   
   const login = async (username: string, password: string): Promise<Omit<User, "password">> => {
-    const response = await apiRequest("POST", "/api/auth/login", { username, password });
-    const userData = await response.json();
-    setUser(userData);
-    return userData;
+    try {
+      const response = await fetch("/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ username, password }),
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Login failed");
+      }
+      
+      const userData = await response.json();
+      setUser(userData);
+      return userData;
+    } catch (error) {
+      console.error("Login error:", error);
+      throw error;
+    }
   };
   
   const register = async (userData: Omit<InsertUser, "password"> & { password: string }): Promise<Omit<User, "password">> => {
-    const response = await apiRequest("POST", "/api/auth/register", userData);
-    const newUser = await response.json();
-    setUser(newUser);
-    return newUser;
+    try {
+      const response = await fetch("/api/auth/register", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(userData),
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Registration failed");
+      }
+      
+      const newUser = await response.json();
+      setUser(newUser);
+      return newUser;
+    } catch (error) {
+      console.error("Registration error:", error);
+      throw error;
+    }
   };
   
   const logout = async (): Promise<void> => {
-    await apiRequest("POST", "/api/auth/logout", {});
-    setUser(null);
+    try {
+      const response = await fetch("/api/auth/logout", {
+        method: "POST",
+        credentials: "include"
+      });
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(errorText || "Logout failed");
+      }
+      
+      setUser(null);
+    } catch (error) {
+      console.error("Logout error:", error);
+      throw error;
+    }
   };
   
   const value = {

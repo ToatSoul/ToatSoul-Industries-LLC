@@ -64,19 +64,20 @@ export default function Navbar() {
             <div className="hidden md:flex items-center space-x-2">
               {user ? (
                 <div className="flex items-center space-x-2">
-                  <Button 
-                    variant="ghost" 
-                    className="flex items-center space-x-2"
-                    onClick={() => window.location.href = `/profile/${user.id}`}
-                  >
-                    <Avatar className="h-8 w-8">
-                      <AvatarImage src={user.avatarUrl || ""} alt={user.username} />
-                      <AvatarFallback>
-                        {user.username.slice(0, 2).toUpperCase()}
-                      </AvatarFallback>
-                    </Avatar>
-                    <span>{user.username}</span>
-                  </Button>
+                  <Link href={`/profile/${user.id}`}>
+                    <Button 
+                      variant="ghost" 
+                      className="flex items-center space-x-2"
+                    >
+                      <Avatar className="h-8 w-8">
+                        <AvatarImage src={user.avatarUrl || ""} alt={user.username} />
+                        <AvatarFallback>
+                          {user.username.slice(0, 2).toUpperCase()}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span>{user.username}</span>
+                    </Button>
+                  </Link>
                   <Button variant="outline" size="sm" onClick={handleLogout}>
                     Sign out
                   </Button>
