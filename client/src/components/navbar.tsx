@@ -120,7 +120,12 @@ export default function Navbar() {
                 Forums
               </Link>
 
-              <div className="pt-4 border-t">
+              <div className="pt-4 border-t flex flex-col space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Toggle Theme</span>
+                  <ThemeToggle />
+                </div>
+                
                 {user ? (
                   <>
                     <Link href={`/profile/${user.id}`}>
