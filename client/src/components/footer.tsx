@@ -17,6 +17,27 @@ export default function Footer() {
             <Link href="/forums" className="text-sm text-gray-600 hover:text-primary transition-colors">
               Forums
             </Link>
+            <Button 
+              variant="link" 
+              className="text-sm text-gray-600 hover:text-gray-900 p-0"
+              onClick={() => window.location.href = "/terms"}
+            >
+              Terms
+            </Button>
+            <Button 
+              variant="link" 
+              className="text-sm text-gray-600 hover:text-gray-900 p-0"
+              onClick={() => window.location.href = "/privacy"}
+            >
+              Privacy
+            </Button>
+            <Button 
+              variant="link" 
+              className="text-sm text-gray-600 hover:text-gray-900 p-0"
+              onClick={() => window.location.href = "/contact"}
+            >
+              Contact
+            </Button>
           </nav>
         </div>
       </div>
