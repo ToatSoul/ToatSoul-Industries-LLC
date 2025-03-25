@@ -1,31 +1,56 @@
+import { Link } from "wouter";
+import { useAuth } from "@/lib/auth";
 import { useState } from "react";
-import Link from "wouter/link";
-import { Menu, X } from "lucide-react";
-import { Button } from "./ui/button";
-import { Avatar, AvatarImage, AvatarFallback } from "./ui/avatar";
-import { ThemeToggle } from "./theme-toggle";
+import { Button } from "@/components/ui/button";
+import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
+import { Menu, X, User, LogOut } from "lucide-react";
+import AuthModal from "@/components/auth-modal";
+import { ThemeToggle } from "@/components/ui/theme-toggle";
 
-export default function Navbar({ 
-  user, 
-  handleLogout, 
-  openLoginModal, 
-  openSignupModal 
-}: {
-  user?: { id: number; username: string; avatarUrl?: string };
-  handleLogout: () => void;
-  openLoginModal: () => void;
-  openSignupModal: () => void;
-}) {
+export default function Navbar() {
+  const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState<"login" | "signup" | null>(null);
 
-  const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
-  const closeMenu = () => setIsMenuOpen(false);
+  const toggleMenu = () => {
+    setIsMenuOpen(!isMenuOpen);
+  };
+
+  const closeMenu = () => {
+    setIsMenuOpen(false);
+  };
+
+  const handleLogout = async () => {
+    await logout();
+    closeMenu();
+  };
+
+  const openLoginModal = () => {
+    setShowAuthModal("login");
+    closeMenu();
+  };
+
+  const openSignupModal = () => {
+    setShowAuthModal("signup");
+    closeMenu();
+  };
+
+  const closeAuthModal = () => {
+    setShowAuthModal(null);
+  };
 
   return (
-    <nav className="border-b border-border bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container mx-auto">
-        <div className="relative flex h-16 items-center justify-between">
-          <div className="flex flex-1 items-center justify-between">
+    <>
+      <header className="bg-background border-b sticky top-0 z-10">
+        <div className="container mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex justify-between items-center h-16">
+            {/* Logo */}
+            <div className="flex-shrink-0">
+              <Link href="/" className="text-xl font-bold text-primary">
+                ToastSoul
+              </Link>
+            </div>
+
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-4">
               <Link href="/" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
@@ -39,7 +64,7 @@ export default function Navbar({
             {/* Desktop Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
               <ThemeToggle />
-
+              
               {user ? (
                 <div className="flex items-center space-x-2 ml-2">
                   <Link href={`/profile/${user.id}`}>
@@ -94,29 +119,56 @@ export default function Navbar({
               <Link href="/forums" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
                 Forums
               </Link>
-              {user ? (
-                <>
-                  <Link href={`/profile/${user.id}`} onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
-                    Profile
-                  </Link>
-                  <button onClick={() => { closeMenu(); handleLogout(); }} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
-                    Sign out
-                  </button>
-                </>
-              ) : (
-                <>
-                  <button onClick={() => { closeMenu(); openLoginModal(); }} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
-                    Log in
-                  </button>
-                  <button onClick={() => { closeMenu(); openSignupModal(); }} className="block w-full text-left px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
-                    Sign up
-                  </button>
-                </>
-              )}
+
+              <div className="pt-4 border-t border-border flex flex-col space-y-2">
+                <div className="flex justify-between items-center">
+                  <span className="text-sm font-medium">Toggle Theme</span>
+                  <ThemeToggle />
+                </div>
+                
+                {user ? (
+                  <>
+                    <Link href={`/profile/${user.id}`}>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start"
+                        onClick={closeMenu}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        Profile
+                      </Button>
+                    </Link>
+                    <Button
+                      variant="ghost"
+                      className="w-full justify-start text-red-500"
+                      onClick={handleLogout}
+                    >
+                      <LogOut className="mr-2 h-4 w-4" />
+                      Sign out
+                    </Button>
+                  </>
+                ) : (
+                  <div className="flex flex-col space-y-2">
+                    <Button variant="outline" className="w-full" onClick={openLoginModal}>
+                      Log in
+                    </Button>
+                    <Button className="w-full" onClick={openSignupModal}>
+                      Sign up
+                    </Button>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
         )}
-      </div>
-    </nav>
+      </header>
+
+      {/* Auth Modals */}
+      <AuthModal 
+        mode={showAuthModal} 
+        onClose={closeAuthModal}
+        onToggleMode={() => setShowAuthModal(showAuthModal === "login" ? "signup" : "login")}
+      />
+    </>
   );
 }
