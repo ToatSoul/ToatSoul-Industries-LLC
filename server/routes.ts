@@ -560,7 +560,31 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // User profile route
-  app.get('/api/users/:id', async (req, res) => {
+  app.put('/api/users/:id', isAuthenticated, async (req, res) => {
+  try {
+    const userId = parseInt(req.params.id, 10);
+    
+    // Check if user is updating their own profile
+    if (userId !== (req.user as any).id) {
+      return res.status(403).json({ message: 'Can only update your own profile' });
+    }
+
+    const user = await storage.getUser(userId);
+    if (!user) {
+      return res.status(404).json({ message: 'User not found' });
+    }
+
+    // Update user data
+    const updatedUser = await storage.updateUser(userId, req.body);
+    const { password: _, ...userWithoutPassword } = updatedUser;
+    
+    res.json(userWithoutPassword);
+  } catch (error) {
+    res.status(500).json({ message: 'Failed to update user profile' });
+  }
+});
+
+app.get('/api/users/:id', async (req, res) => {
     try {
       const userId = parseInt(req.params.id, 10);
       const user = await storage.getUser(userId);
