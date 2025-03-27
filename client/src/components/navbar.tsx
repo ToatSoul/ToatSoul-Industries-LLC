@@ -60,6 +60,9 @@ export default function Navbar() {
                 Forums
               </Link>
               <Link href="/store" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
+                Store
+              </Link>
+              <Link href="/rewards" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
                 Rewards Store
               </Link>
             </nav>
