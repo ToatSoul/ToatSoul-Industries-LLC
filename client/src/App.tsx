@@ -11,11 +11,13 @@ import Footer from "./components/footer";
 
 // Pages
 import NotFound from "@/pages/not-found";
+        <Route path="/store" component={Store} />
 import Home from "@/pages/home";
 import Forums from "@/pages/forums";
 import ThreadDetail from "@/pages/thread-detail";
 import Profile from "@/pages/profile";
 import NewThread from "@/pages/new-thread";
+import Store from "@/pages/store";
 
 function Loading() {
   return (

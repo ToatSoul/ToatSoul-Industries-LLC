@@ -59,6 +59,9 @@ export default function Navbar() {
               <Link href="/forums" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
                 Forums
               </Link>
+              <Link href="/store" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
+                Store
+              </Link>
             </nav>
 
             {/* Desktop Auth Buttons */}
