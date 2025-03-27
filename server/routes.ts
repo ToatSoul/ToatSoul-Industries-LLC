@@ -711,6 +711,129 @@ app.get('/api/users/:id', async (req, res) => {
     }
   });
 
+  // Blog routes
+  app.get('/api/blog', async (req, res) => {
+    try {
+      const posts = await storage.getBlogPosts();
+      const postsWithAuthors = await Promise.all(posts.map(async (post) => {
+        const author = await storage.getUser(post.userId);
+        const { password: _, ...authorWithoutPassword } = author || {};
+        return { ...post, author: authorWithoutPassword };
+      }));
+      res.json(postsWithAuthors);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch blog posts' });
+    }
+  });
+
+  app.get('/api/blog/:slug', async (req, res) => {
+    try {
+      const post = await storage.getBlogPostBySlug(req.params.slug);
+      if (!post) {
+        return res.status(404).json({ message: 'Blog post not found' });
+      }
+      const author = await storage.getUser(post.userId);
+      const { password: _, ...authorWithoutPassword } = author || {};
+      res.json({ ...post, author: authorWithoutPassword });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch blog post' });
+    }
+  });
+
+  app.post('/api/blog', isAuthenticated, async (req, res) => {
+    try {
+      // Check if user is an author
+      const isAuthor = await storage.isBlogAuthor((req.user as any).id);
+      if (!isAuthor) {
+        return res.status(403).json({ message: 'Only blog authors can create posts' });
+      }
+
+      const postData = insertBlogPostSchema.parse({
+        ...req.body,
+        userId: (req.user as any).id,
+        slug: req.body.title.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+      });
+
+      const post = await storage.createBlogPost(postData);
+      res.status(201).json(post);
+    } catch (error) {
+      return handleZodError(error, res);
+    }
+  });
+
+  app.put('/api/blog/:id', isAuthenticated, async (req, res) => {
+    try {
+      const postId = parseInt(req.params.id, 10);
+      const post = await storage.getBlogPost(postId);
+      
+      if (!post) {
+        return res.status(404).json({ message: 'Blog post not found' });
+      }
+
+      // Check if user is the author of the post or an admin
+      const user = req.user as any;
+      if (post.userId !== user.id && !user.isAdmin) {
+        return res.status(403).json({ message: 'Can only edit your own posts' });
+      }
+
+      const updatedPost = await storage.updateBlogPost(postId, req.body);
+      res.json(updatedPost);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to update blog post' });
+    }
+  });
+
+  // Blog author management routes
+  app.get('/api/blog/authors', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can view authors' });
+      }
+      
+      const authors = await storage.getBlogAuthors();
+      const authorsWithDetails = await Promise.all(authors.map(async (author) => {
+        const user = await storage.getUser(author.userId);
+        const { password: _, ...userWithoutPassword } = user || {};
+        return { ...author, user: userWithoutPassword };
+      }));
+      
+      res.json(authorsWithDetails);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch blog authors' });
+    }
+  });
+
+  app.post('/api/blog/authors', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can add authors' });
+      }
+
+      const authorData = insertBlogAuthorSchema.parse(req.body);
+      const author = await storage.createBlogAuthor(authorData);
+      res.status(201).json(author);
+    } catch (error) {
+      return handleZodError(error, res);
+    }
+  });
+
+  app.delete('/api/blog/authors/:userId', isAuthenticated, async (req, res) => {
+    try {
+      const user = req.user as any;
+      if (!user.isAdmin) {
+        return res.status(403).json({ message: 'Only admins can remove authors' });
+      }
+
+      const userId = parseInt(req.params.userId, 10);
+      await storage.removeBlogAuthor(userId);
+      res.json({ message: 'Author removed successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to remove author' });
+    }
+  });
+
   app.get('/api/search', async (req, res) => {
     try {
       const query = req.query.q as string;

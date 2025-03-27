@@ -180,3 +180,37 @@ export const insertUserRewardSchema = createInsertSchema(userRewards);
 
 export type RewardItem = typeof rewardItems.$inferSelect;
 export type UserReward = typeof userRewards.$inferSelect;
+
+// Blog post schema
+export const blogPosts = pgTable("blog_posts", {
+  id: serial("id").primaryKey(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  slug: text("slug").notNull().unique(),
+  userId: integer("user_id").notNull(),
+  published: boolean("published").default(false).notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  updatedAt: timestamp("updated_at").defaultNow().notNull(),
+});
+
+// Blog author permissions schema
+export const blogAuthors = pgTable("blog_authors", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull().unique(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+});
+
+export const insertBlogPostSchema = createInsertSchema(blogPosts).pick({
+  title: true,
+  content: true,
+  slug: true,
+  userId: true,
+  published: true,
+});
+
+export const insertBlogAuthorSchema = createInsertSchema(blogAuthors).pick({
+  userId: true,
+});
+
+export type BlogPost = typeof blogPosts.$inferSelect;
+export type BlogAuthor = typeof blogAuthors.$inferSelect;

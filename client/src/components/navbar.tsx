@@ -65,12 +65,15 @@ export default function Navbar() {
               <Link href="/rewards" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
                 Rewards Store
               </Link>
+              <Link href="/blog" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
+                Blog
+              </Link>
             </nav>
 
             {/* Desktop Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
               <ThemeToggle />
-              
+
               {user ? (
                 <div className="flex items-center space-x-2 ml-2">
                   <Link href={`/profile/${user.id}`}>
@@ -125,13 +128,22 @@ export default function Navbar() {
               <Link href="/forums" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
                 Forums
               </Link>
+              <Link href="/store" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
+                Store
+              </Link>
+              <Link href="/rewards" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
+                Rewards Store
+              </Link>
+              <Link href="/blog" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
+                Blog
+              </Link>
 
               <div className="pt-4 border-t border-border flex flex-col space-y-2">
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">Toggle Theme</span>
                   <ThemeToggle />
                 </div>
-                
+
                 {user ? (
                   <>
                     <Link href={`/profile/${user.id}`}>
