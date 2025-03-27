@@ -18,6 +18,8 @@ import Profile from "@/pages/profile";
 import NewThread from "@/pages/new-thread";
 import Store from "@/pages/store";
 import RewardsStore from "@/pages/rewards";
+import ProfileEdit from "@/pages/profile-edit"; // Import the ProfileEdit component
+
 
 function Loading() {
   return (
@@ -59,6 +61,7 @@ function App() {
                 <Route path="/forums/category/:categoryId" component={Forums} />
                 <Route path="/thread/:id" component={ThreadDetail} />
                 <Route path="/profile/:id" component={Profile} />
+                <Route path="/profile/:id/edit" component={ProfileEdit} /> {/* Added ProfileEdit route */}
                 <Route path="/new-thread" component={NewThread} />
                 <Route path="/store" component={Store} />
                 <Route path="/rewards" component={RewardsStore} />
