@@ -17,7 +17,7 @@ import ThreadDetail from "@/pages/thread-detail";
 import Profile from "@/pages/profile";
 import NewThread from "@/pages/new-thread";
 import Store from "@/pages/store";
-import RewardsStore from "@/pages/rewards-store"; // Assuming this component exists
+import RewardsStore from "@/pages/rewards";
 
 function Loading() {
   return (
