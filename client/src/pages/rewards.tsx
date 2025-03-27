@@ -9,12 +9,23 @@ import { toast } from "sonner";
 export default function RewardsStore() {
   const { user } = useUser();
   const [rewardItems, setRewardItems] = useState<RewardItem[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
+    setIsLoading(true);
     fetch('/api/rewards')
-      .then(res => res.json())
-      .then(setRewardItems)
-      .catch(() => toast.error("Failed to load rewards"));
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load rewards');
+        return res.json();
+      })
+      .then(data => {
+        setRewardItems(data);
+        setIsLoading(false);
+      })
+      .catch((error) => {
+        toast.error("Failed to load rewards");
+        setIsLoading(false);
+      });
   }, []);
 
   const purchaseReward = async (rewardId: number, cost: number) => {
@@ -54,33 +65,37 @@ export default function RewardsStore() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        {rewardItems.map(reward => (
-          <Card key={reward.id}>
-            <CardContent className="p-6">
-              <div className="flex items-center gap-4 mb-4">
-                {reward.icon && (
-                  <div className="text-3xl">{reward.icon}</div>
-                )}
-                <div>
-                  <h3 className="text-xl font-semibold">{reward.name}</h3>
-                  <p className="text-sm text-muted-foreground">{reward.type}</p>
+      {isLoading ? (
+        <div className="text-center">Loading rewards...</div>
+      ) : (
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {Array.isArray(rewardItems) && rewardItems.map(reward => (
+            <Card key={reward.id}>
+              <CardContent className="p-6">
+                <div className="flex items-center gap-4 mb-4">
+                  {reward.icon && (
+                    <div className="text-3xl">{reward.icon}</div>
+                  )}
+                  <div>
+                    <h3 className="text-xl font-semibold">{reward.name}</h3>
+                    <p className="text-sm text-muted-foreground">{reward.type}</p>
+                  </div>
                 </div>
-              </div>
-              <p className="mb-4 text-muted-foreground">{reward.description}</p>
-              <div className="flex justify-between items-center">
-                <div className="text-lg font-semibold">{reward.cost} points</div>
-                <Button 
-                  onClick={() => purchaseReward(reward.id, reward.cost)}
-                  disabled={!user || user.reputation < reward.cost}
-                >
-                  Purchase
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        ))}
-      </div>
+                <p className="mb-4 text-muted-foreground">{reward.description}</p>
+                <div className="flex justify-between items-center">
+                  <div className="text-lg font-semibold">{reward.cost} points</div>
+                  <Button 
+                    onClick={() => purchaseReward(reward.id, reward.cost)}
+                    disabled={!user || user.reputation < reward.cost}
+                  >
+                    Purchase
+                  </Button>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
