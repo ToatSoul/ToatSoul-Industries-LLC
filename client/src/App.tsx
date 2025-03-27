@@ -17,6 +17,7 @@ import ThreadDetail from "@/pages/thread-detail";
 import Profile from "@/pages/profile";
 import NewThread from "@/pages/new-thread";
 import Store from "@/pages/store";
+import RewardsStore from "@/pages/rewards-store"; // Assuming this component exists
 
 function Loading() {
   return (
@@ -60,6 +61,7 @@ function App() {
                 <Route path="/profile/:id" component={Profile} />
                 <Route path="/new-thread" component={NewThread} />
                 <Route path="/store" component={Store} />
+                <Route path="/rewards" component={RewardsStore} />
                 <Route component={NotFound} />
               </Switch>
             </Suspense>
