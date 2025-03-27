@@ -102,6 +102,9 @@ export default function Profile() {
             
             {isOwnProfile && (
               <div className="mt-4 md:mt-0 md:ml-auto">
+                <Button asChild>
+                  <Link href={`/profile/${user.id}/edit`}>Edit Profile</Link>
+                </Button>
                 <Button variant="outline" asChild>
                   <Link href="/settings">Edit Profile</Link>
                 </Button>

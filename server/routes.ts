@@ -560,7 +560,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // User profile route
-  app.put('/api/users/:id', isAuthenticated, async (req, res) => {
+  app.put('/api/users/:id', isAuthenticated, upload.single('avatar'), async (req, res) => {
   try {
     const userId = parseInt(req.params.id, 10);
     
@@ -574,8 +574,51 @@ export async function registerRoutes(app: Express): Promise<Server> {
       return res.status(404).json({ message: 'User not found' });
     }
 
+    // Prepare update data
+    const updateData: Partial<User> = {};
+    
+    // Handle basic fields
+    if (req.body.username && req.body.username !== user.username) {
+      const existingUser = await storage.getUserByUsername(req.body.username);
+      if (existingUser) {
+        return res.status(400).json({ message: 'Username already taken' });
+      }
+      updateData.username = req.body.username;
+    }
+    
+    if (req.body.email && req.body.email !== user.email) {
+      const existingUser = await storage.getUserByEmail(req.body.email);
+      if (existingUser) {
+        return res.status(400).json({ message: 'Email already taken' });
+      }
+      updateData.email = req.body.email;
+    }
+
+    // Handle password update
+    if (req.body.currentPassword && req.body.newPassword) {
+      const validUser = await storage.validateUser(user.username, req.body.currentPassword);
+      if (!validUser) {
+        return res.status(400).json({ message: 'Current password is incorrect' });
+      }
+      updateData.password = req.body.newPassword;
+    }
+
+    // Handle avatar upload
+    if (req.file) {
+      // Delete old avatar if it exists
+      if (user.avatarUrl) {
+        try {
+          const oldAvatarPath = path.join(uploadsDir, path.basename(user.avatarUrl));
+          await fs.unlink(oldAvatarPath);
+        } catch (error) {
+          console.error('Failed to delete old avatar:', error);
+        }
+      }
+      updateData.avatarUrl = `/uploads/${req.file.filename}`;
+    }
+
     // Update user data
-    const updatedUser = await storage.updateUser(userId, req.body);
+    const updatedUser = await storage.updateUser(userId, updateData);
     const { password: _, ...userWithoutPassword } = updatedUser;
     
     res.json(userWithoutPassword);
