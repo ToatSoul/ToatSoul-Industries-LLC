@@ -20,7 +20,8 @@ import Store from "@/pages/store";
 import RewardsStore from "@/pages/rewards";
 import ProfileEdit from "@/pages/profile-edit";
 import Blog from "@/pages/blog";
-import BlogPost from "@/pages/blog-post"; // Import the ProfileEdit component
+import BlogPost from "@/pages/blog-post";
+import NewBlogPost from "@/pages/blog-new"; // Added import for NewBlogPost
 
 
 function Loading() {
@@ -63,12 +64,13 @@ function App() {
                 <Route path="/forums/category/:categoryId" component={Forums} />
                 <Route path="/thread/:id" component={ThreadDetail} />
                 <Route path="/profile/:id" component={Profile} />
-                <Route path="/profile/:id/edit" component={ProfileEdit} /> {/* Added ProfileEdit route */}
+                <Route path="/profile/:id/edit" component={ProfileEdit} />
                 <Route path="/new-thread" component={NewThread} />
                 <Route path="/store" component={Store} />
                 <Route path="/rewards" component={RewardsStore} />
                 <Route path="/blog" component={Blog} />
                 <Route path="/blog/:slug" component={BlogPost} />
+                <Route path="/blog/new" component={NewBlogPost} /> {/* Added route for NewBlogPost */}
                 <Route component={NotFound} />
               </Switch>
             </Suspense>
