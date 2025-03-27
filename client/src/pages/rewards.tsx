@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -47,7 +46,7 @@ export default function RewardsStore() {
       });
 
       if (!res.ok) throw new Error();
-      
+
       toast.success("Reward purchased successfully!");
     } catch {
       toast.error("Failed to purchase reward");
