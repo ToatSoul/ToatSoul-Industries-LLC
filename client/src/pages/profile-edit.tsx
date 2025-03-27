@@ -10,7 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 
 export default function ProfileEdit() {
-  const { user, refetchUser } = useAuth();
+  const { user, refresh } = useAuth();
   const [, setLocation] = useLocation();
   const { toast } = useToast();
   
@@ -51,7 +51,7 @@ export default function ProfileEdit() {
         throw new Error(error.message);
       }
 
-      await refetchUser();
+      await refresh();
       toast({
         title: "Success",
         description: "Profile updated successfully"
