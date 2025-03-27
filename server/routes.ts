@@ -605,6 +605,45 @@ export async function registerRoutes(app: Express): Promise<Server> {
   });
   
   // Search route
+  // Rewards routes
+  app.get('/api/rewards', async (req, res) => {
+    try {
+      const rewards = await storage.getRewardItems();
+      res.json(rewards);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch rewards' });
+    }
+  });
+
+  app.post('/api/rewards/purchase', isAuthenticated, async (req, res) => {
+    try {
+      const { rewardId } = req.body;
+      const userId = (req.user as any).id;
+
+      const reward = await storage.getRewardItem(rewardId);
+      if (!reward) {
+        return res.status(404).json({ message: 'Reward not found' });
+      }
+
+      const user = await storage.getUser(userId);
+      if (user.reputation < reward.cost) {
+        return res.status(400).json({ message: 'Not enough reputation points' });
+      }
+
+      // Start transaction
+      await storage.db.transaction(async (tx) => {
+        // Deduct reputation
+        await storage.updateUserReputation(userId, -reward.cost);
+        // Add reward to user
+        await storage.createUserReward({ userId, rewardId });
+      });
+
+      res.json({ message: 'Reward purchased successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to purchase reward' });
+    }
+  });
+
   app.get('/api/search', async (req, res) => {
     try {
       const query = req.query.q as string;

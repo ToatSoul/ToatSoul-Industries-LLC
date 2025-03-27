@@ -155,3 +155,28 @@ export type Tag = typeof tags.$inferSelect;
 
 export type InsertThreadTag = z.infer<typeof insertThreadTagSchema>;
 export type ThreadTag = typeof threadTags.$inferSelect;
+
+// Reward item schema
+export const rewardItems = pgTable("reward_items", {
+  id: serial("id").primaryKey(),
+  name: text("name").notNull(),
+  description: text("description").notNull(),
+  type: text("type").notNull(), // 'flair', 'title', etc.
+  cost: integer("cost").notNull(),
+  icon: text("icon"),
+});
+
+// User rewards schema
+export const userRewards = pgTable("user_rewards", {
+  id: serial("id").primaryKey(),
+  userId: integer("user_id").notNull(),
+  rewardId: integer("reward_id").notNull(),
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  active: boolean("active").default(true).notNull(),
+});
+
+export const insertRewardItemSchema = createInsertSchema(rewardItems);
+export const insertUserRewardSchema = createInsertSchema(userRewards);
+
+export type RewardItem = typeof rewardItems.$inferSelect;
+export type UserReward = typeof userRewards.$inferSelect;
