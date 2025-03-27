@@ -11,7 +11,6 @@ import Footer from "./components/footer";
 
 // Pages
 import NotFound from "@/pages/not-found";
-        <Route path="/store" component={Store} />
 import Home from "@/pages/home";
 import Forums from "@/pages/forums";
 import ThreadDetail from "@/pages/thread-detail";
@@ -32,14 +31,14 @@ function App() {
   useEffect(() => {
     const theme = localStorage.getItem("theme") || "system";
     const root = window.document.documentElement;
-    
+
     root.classList.remove("light", "dark");
-    
+
     if (theme === "system") {
       const systemTheme = window.matchMedia("(prefers-color-scheme: dark)").matches
         ? "dark"
         : "light";
-      
+
       root.classList.add(systemTheme);
     } else {
       root.classList.add(theme);
@@ -60,6 +59,7 @@ function App() {
                 <Route path="/thread/:id" component={ThreadDetail} />
                 <Route path="/profile/:id" component={Profile} />
                 <Route path="/new-thread" component={NewThread} />
+                <Route path="/store" component={Store} />
                 <Route component={NotFound} />
               </Switch>
             </Suspense>
