@@ -7,23 +7,39 @@ export default function Footer() {
         <div className="flex flex-col md:flex-row justify-between items-center">
           <div className="mb-4 md:mb-0">
             <p className="text-sm text-muted-foreground">
-              © {new Date().getFullYear()} ToastSoul Industries. All rights reserved.
+              © {new Date().getFullYear()} ToatSoul Industries. All rights
+              reserved.
             </p>
           </div>
           <nav className="flex gap-6">
-            <Link href="/" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            <Link
+              href="/"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
               Home
             </Link>
-            <Link href="/forums" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            <Link
+              href="/forums"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
               Forums
             </Link>
-            <Link href="/terms" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            <Link
+              href="/terms"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
               Terms
             </Link>
-            <Link href="/privacy" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            <Link
+              href="/privacy"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
               Privacy
             </Link>
-            <Link href="/contact" className="text-sm text-muted-foreground hover:text-primary transition-colors">
+            <Link
+              href="/contact"
+              className="text-sm text-muted-foreground hover:text-primary transition-colors"
+            >
               Contact
             </Link>
           </nav>

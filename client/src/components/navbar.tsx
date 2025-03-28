@@ -10,7 +10,9 @@ import { ThemeToggle } from "@/components/ui/theme-toggle";
 export default function Navbar() {
   const { user, logout } = useAuth();
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const [showAuthModal, setShowAuthModal] = useState<"login" | "signup" | null>(null);
+  const [showAuthModal, setShowAuthModal] = useState<"login" | "signup" | null>(
+    null,
+  );
 
   const toggleMenu = () => {
     setIsMenuOpen(!isMenuOpen);
@@ -47,25 +49,40 @@ export default function Navbar() {
             {/* Logo */}
             <div className="flex-shrink-0">
               <Link href="/" className="text-xl font-bold text-primary">
-                ToastSoul
+                ToatSoul Industries
               </Link>
             </div>
 
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-4">
-              <Link href="/" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
+              <Link
+                href="/"
+                className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
+              >
                 Home
               </Link>
-              <Link href="/forums" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
+              <Link
+                href="/forums"
+                className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
+              >
                 Forums
               </Link>
-              <Link href="/store" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
+              <Link
+                href="/store"
+                className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
+              >
                 Store
               </Link>
-              <Link href="/rewards" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
+              <Link
+                href="/rewards"
+                className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
+              >
                 Rewards Store
               </Link>
-              <Link href="/blog" className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20">
+              <Link
+                href="/blog"
+                className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
+              >
                 Blog
               </Link>
             </nav>
@@ -77,12 +94,15 @@ export default function Navbar() {
               {user ? (
                 <div className="flex items-center space-x-2 ml-2">
                   <Link href={`/profile/${user.id}`}>
-                    <Button 
-                      variant="ghost" 
+                    <Button
+                      variant="ghost"
                       className="flex items-center space-x-2"
                     >
                       <Avatar className="h-8 w-8">
-                        <AvatarImage src={user.avatarUrl || ""} alt={user.username} />
+                        <AvatarImage
+                          src={user.avatarUrl || ""}
+                          alt={user.username}
+                        />
                         <AvatarFallback>
                           {user.username.slice(0, 2).toUpperCase()}
                         </AvatarFallback>
@@ -112,7 +132,11 @@ export default function Navbar() {
                 onClick={toggleMenu}
                 className="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-primary hover:bg-secondary/20 focus:outline-none"
               >
-                {isMenuOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
+                {isMenuOpen ? (
+                  <X className="h-6 w-6" />
+                ) : (
+                  <Menu className="h-6 w-6" />
+                )}
               </button>
             </div>
           </div>
@@ -122,19 +146,39 @@ export default function Navbar() {
         {isMenuOpen && (
           <div className="md:hidden border-t border-border">
             <div className="container mx-auto px-4 pt-2 pb-3 space-y-1">
-              <Link href="/" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
+              <Link
+                href="/"
+                onClick={closeMenu}
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
+              >
                 Home
               </Link>
-              <Link href="/forums" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
+              <Link
+                href="/forums"
+                onClick={closeMenu}
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
+              >
                 Forums
               </Link>
-              <Link href="/store" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
+              <Link
+                href="/store"
+                onClick={closeMenu}
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
+              >
                 Store
               </Link>
-              <Link href="/rewards" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
+              <Link
+                href="/rewards"
+                onClick={closeMenu}
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
+              >
                 Rewards Store
               </Link>
-              <Link href="/blog" onClick={closeMenu} className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20">
+              <Link
+                href="/blog"
+                onClick={closeMenu}
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
+              >
                 Blog
               </Link>
 
@@ -147,8 +191,8 @@ export default function Navbar() {
                 {user ? (
                   <>
                     <Link href={`/profile/${user.id}`}>
-                      <Button 
-                        variant="ghost" 
+                      <Button
+                        variant="ghost"
                         className="w-full justify-start"
                         onClick={closeMenu}
                       >
@@ -167,7 +211,11 @@ export default function Navbar() {
                   </>
                 ) : (
                   <div className="flex flex-col space-y-2">
-                    <Button variant="outline" className="w-full" onClick={openLoginModal}>
+                    <Button
+                      variant="outline"
+                      className="w-full"
+                      onClick={openLoginModal}
+                    >
                       Log in
                     </Button>
                     <Button className="w-full" onClick={openSignupModal}>
@@ -182,10 +230,12 @@ export default function Navbar() {
       </header>
 
       {/* Auth Modals */}
-      <AuthModal 
-        mode={showAuthModal} 
+      <AuthModal
+        mode={showAuthModal}
         onClose={closeAuthModal}
-        onToggleMode={() => setShowAuthModal(showAuthModal === "login" ? "signup" : "login")}
+        onToggleMode={() =>
+          setShowAuthModal(showAuthModal === "login" ? "signup" : "login")
+        }
       />
     </>
   );
