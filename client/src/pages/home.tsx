@@ -111,7 +111,7 @@ export default function Home() {
           </h2>
           <p className="text-lg text-gray-600 max-w-2xl mx-auto">
             Everything you need to connect, learn, and share with fellow
-            professionals
+            professionals or enthusiasts.
           </p>
         </div>
 
@@ -138,8 +138,7 @@ export default function Home() {
             </h3>
             <p className="text-gray-600">
               Participate in discussions and earn reputation through valuable
-              contributions. Upvote helpful content and build your professional
-              profile.
+              contributions. Reward interesting content and build your own custom profile, all while earning rewards for your efforts.
             </p>
           </div>
 
@@ -190,8 +189,7 @@ export default function Home() {
               User Profiles
             </h3>
             <p className="text-gray-600">
-              Create your professional profile, showcase your expertise, and
-              track your contributions to the community.
+              Create your custom profile, showcase your expertise, and track your contributions to the community. Earn rewards for your profile and contributions by spending your points in the rewards store.
             </p>
           </div>
         </div>
