@@ -68,11 +68,25 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup sessions and Passport for authentication
-  app.use(session({
+  const pgSession = require('connect-pg-simple')(session);
+const { Pool } = require('pg');
+
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL
+});
+
+app.use(session({
+    store: new pgSession({
+      pool,
+      tableName: 'user_sessions'
+    }),
     secret: process.env.SESSION_SECRET || randomBytes(32).toString('hex'),
     resave: false,
     saveUninitialized: false,
-    cookie: { secure: process.env.NODE_ENV === 'production' }
+    cookie: { 
+      secure: process.env.NODE_ENV === 'production',
+      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
+    }
   }));
 
   app.use(passport.initialize());
