@@ -13,6 +13,8 @@ import fs from "fs/promises";
 import { randomBytes } from "crypto";
 import { ZodError } from "zod";
 import { fromZodError } from "zod-validation-error";
+import pg from 'pg';
+import connectPgSimple from 'connect-pg-simple';
 
 // Multer setup for file uploads
 const uploadsDir = path.join(process.cwd(), "uploads");
@@ -68,9 +70,6 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup sessions and Passport for authentication
-import pg from 'pg';
-import connectPgSimple from 'connect-pg-simple';
-
 const pgSession = connectPgSimple(session);
 const { Pool } = pg;
 
