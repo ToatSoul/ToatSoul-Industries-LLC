@@ -68,8 +68,8 @@ const upload = multer({
 
 export async function registerRoutes(app: Express): Promise<Server> {
   // Setup sessions and Passport for authentication
-  import pg from 'pg';
-import connectPgSimple from 'connect-pg-simple';
+const pg = require('pg');
+const connectPgSimple = require('connect-pg-simple');
 
 const pgSession = connectPgSimple(session);
 const { Pool } = pg;
