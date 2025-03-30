@@ -148,7 +148,7 @@ export default function Forums() {
             <div className="text-center py-12">
               <h2 className="text-2xl font-bold mb-4">Please Log In</h2>
               <p className="text-gray-600 mb-6">You need to be logged in to participate in forum discussions.</p>
-              <Button onClick={() => window.location.reload()}>
+              <Button onClick={openLoginModal}>
                 Log In
               </Button>
             </div>
