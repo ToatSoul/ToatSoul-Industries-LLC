@@ -151,6 +151,19 @@ export class MemStorage implements IStorage {
       await this.createCategory(category);
     }
 
+    // Initialize default rewards
+    const rewards = [
+      { name: "Gold Star Badge", description: "Show off your expertise with a shiny gold star!", type: "badge", cost: 100, icon: "⭐" },
+      { name: "Expert Title", description: "Get the 'Expert' title displayed on your profile", type: "title", cost: 250, icon: "👑" },
+      { name: "Rainbow Name", description: "Make your username appear in rainbow colors", type: "style", cost: 500, icon: "🌈" },
+      { name: "Custom Banner", description: "Add a custom banner to your profile", type: "banner", cost: 750, icon: "🎨" },
+      { name: "Verified Badge", description: "Get a special verified badge next to your name", type: "badge", cost: 1000, icon: "✓" }
+    ];
+
+    for (const reward of rewards) {
+      this.rewards.set(this.rewardIdCounter++, reward);
+    }
+
     // Create default tags
     const tags = [
       { name: "Announcement", color: "#22c55e" },

@@ -54,11 +54,11 @@ interface CategorySidebarProps {
 
 export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
   const [location] = useLocation();
-  
+
   const { data: categories, isLoading: categoriesLoading } = useQuery({
     queryKey: ['/api/categories'],
   });
-  
+
   // This would normally be a real API call
   const { data: topContributors, isLoading: contributorsLoading } = useQuery({
     queryKey: ['/api/users/top-contributors'],
@@ -71,7 +71,7 @@ export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
       ];
     }
   });
-  
+
   return (
     <div className="space-y-6">
       <Card className="overflow-hidden">
@@ -94,8 +94,7 @@ export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
               ))
             ) : (
               categories?.map((category: Category) => (
-                <Link key={category.id} href={`/forums/category/${category.id}`}>
-                  <a className={cn(
+                <a key={category.id} href={`/forums/category/${category.id}`} className={cn(
                     "block p-4 hover:bg-gray-50",
                     activeCategoryId === category.id && "bg-gray-100"
                   )}>
@@ -107,13 +106,12 @@ export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
                       </div>
                     </div>
                   </a>
-                </Link>
               ))
             )}
           </div>
         </CardContent>
       </Card>
-      
+
       <Card className="overflow-hidden">
         <CardHeader className="bg-primary-50 border-b border-primary-100 py-4">
           <CardTitle className="text-lg font-semibold text-primary-800">
