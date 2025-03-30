@@ -69,7 +69,20 @@ export interface IStorage {
 }
 
 // Placeholder types - Replace with your actual types from schema
-type Reward = { id: number; name: string; description: string };
+import { rewardItems, userRewards } from "@shared/schema";
+
+async function getRewardItems() {
+  return await db.select().from(rewardItems);
+}
+
+async function getRewardItem(id: number) {
+  const items = await db.select().from(rewardItems).where(eq(rewardItems.id, id));
+  return items[0];
+}
+
+async function createUserReward(data: { userId: number; rewardId: number }) {
+  return await db.insert(userRewards).values(data).returning();
+}
 type UserReward = { userId: number; rewardId: number; createdAt: Date };
 
 
