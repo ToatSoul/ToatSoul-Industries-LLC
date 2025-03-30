@@ -16,12 +16,14 @@ import { Input } from "@/components/ui/input";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import AuthModal from "@/components/auth-modal";
 
 export default function Forums() {
   const [location, navigate] = useLocation();
   const [categoryMatch, params] = useRoute("/forums/category/:categoryId");
   const { user } = useAuth();
   const { toast } = useToast();
+  const [showAuthModal, setShowAuthModal] = useState<"login" | "signup" | null>(null);
 
   // Pagination and filtering
   const [currentPage, setCurrentPage] = useState(1);
@@ -29,6 +31,10 @@ export default function Forums() {
   const [filterBy, setFilterBy] = useState("all");
   const [searchQuery, setSearchQuery] = useState("");
   const [isVoting, setIsVoting] = useState(false);
+
+  const openLoginModal = () => setShowAuthModal("login");
+  const openSignupModal = () => setShowAuthModal("signup");
+  const closeAuthModal = () => setShowAuthModal(null);
 
   // Extract query params
   useEffect(() => {
@@ -134,6 +140,7 @@ export default function Forums() {
   const totalPages = 10; // This should come from API in a real implementation
 
   return (
+    <>
     <main className="flex-grow container mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
         {/* Sidebar */}
@@ -384,5 +391,11 @@ export default function Forums() {
         </div>
       </div>
     </main>
+    <AuthModal
+      mode={showAuthModal}
+      onClose={closeAuthModal}
+      onToggleMode={() => setShowAuthModal(showAuthModal === "login" ? "signup" : "login")}
+    />
+    </>
   );
 }
