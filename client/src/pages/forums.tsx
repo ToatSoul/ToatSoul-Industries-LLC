@@ -143,6 +143,17 @@ export default function Forums() {
         
         {/* Main content area */}
         <div className="lg:col-span-9">
+          {/* Auth check */}
+          {!user ? (
+            <div className="text-center py-12">
+              <h2 className="text-2xl font-bold mb-4">Please Log In</h2>
+              <p className="text-gray-600 mb-6">You need to be logged in to participate in forum discussions.</p>
+              <Button onClick={() => window.location.reload()}>
+                Log In
+              </Button>
+            </div>
+          ) : (
+          <>
           {/* Forum header section */}
           <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-6">
             <div>
@@ -383,6 +394,8 @@ export default function Forums() {
             )}
           </div>
         </div>
+        </>
+        )}
       </div>
     </main>
   );
