@@ -68,9 +68,9 @@ function App() {
                 <Route path="/new-thread" component={NewThread} />
                 <Route path="/store" component={Store} />
                 <Route path="/rewards" component={RewardsStore} />
-                <Route path="/blog" component={Blog} />
+                <Route path="/blog/new" component={NewBlogPost} />
                 <Route path="/blog/:slug" component={BlogPost} />
-                <Route path="/blog/new" component={NewBlogPost} /> {/* Added route for NewBlogPost */}
+                <Route path="/blog" component={Blog} />
                 <Route component={NotFound} />
               </Switch>
             </Suspense>
