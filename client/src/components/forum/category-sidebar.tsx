@@ -101,7 +101,7 @@ export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
                     <div className="flex items-center">
                       <div className="mr-3">{getCategoryIcon(category.icon)}</div>
                       <div>
-                        <p className="font-medium text-gray-900">{category.name}</p>
+                        <p className="font-medium text-gray-900 dark:text-white">{category.name}</p>
                         <p className="text-sm text-gray-500">{category.description}</p>
                       </div>
                     </div>
