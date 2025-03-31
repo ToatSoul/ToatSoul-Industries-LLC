@@ -94,7 +94,7 @@ export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
               ))
             ) : (
               categories?.map((category: Category) => (
-                <a key={category.id} href={`/forums/category/${category.id}`} className={cn(
+                <Link key={category.id} href={`/forums/category/${category.id}`} className={cn(
                     "block p-4 hover:bg-gray-50",
                     activeCategoryId === category.id && "bg-gray-100"
                   )}>
@@ -105,7 +105,7 @@ export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
                         <p className="text-sm text-gray-500">{category.description}</p>
                       </div>
                     </div>
-                  </a>
+                  </Link>
               ))
             )}
           </div>
