@@ -2,6 +2,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useAuth } from "@/lib/auth";
 
 // Template data for store items
 const hardwareTemplates = [
@@ -53,9 +54,18 @@ const softwareTemplates = [
 ];
 
 export default function Store() {
+  const { user } = useAuth();
+  
   return (
     <div className="container mx-auto py-8 px-4">
-      <h1 className="text-3xl font-bold mb-8">TSI Store</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-3xl font-bold">TSI Store</h1>
+        {user && (
+          <div className="text-lg">
+            Available Points: <span className="font-bold text-primary">{user.reputation || 0}</span>
+          </div>
+        )}
+      </div>
       
       <Tabs defaultValue="hardware" className="space-y-4">
         <TabsList>
