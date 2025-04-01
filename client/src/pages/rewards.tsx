@@ -1,100 +1,53 @@
-import { useState, useEffect } from "react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
-import { RewardItem, User } from "@shared/schema";
-import { useUser } from "@/hooks/use-user";
-import { toast } from "sonner";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useAuth } from "@/lib/auth";
+import { apiRequest } from "@/lib/queryClient";
 
 export default function RewardsStore() {
-  const { user } = useUser();
-  const [rewardItems, setRewardItems] = useState<RewardItem[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const { user } = useAuth();
+  const { data: rewards } = useQuery({
+    queryKey: ["/api/rewards"],
+    enabled: !!user,
+  });
 
-  useEffect(() => {
-    setIsLoading(true);
-    fetch('/api/rewards')
-      .then(res => {
-        if (!res.ok) throw new Error('Failed to load rewards');
-        return res.json();
-      })
-      .then(data => {
-        setRewardItems(data);
-        setIsLoading(false);
-      })
-      .catch((error) => {
-        toast.error("Failed to load rewards");
-        setIsLoading(false);
-      });
-  }, []);
-
-  const purchaseReward = async (rewardId: number, cost: number) => {
-    if (!user) {
-      toast.error("Please log in to purchase rewards");
-      return;
-    }
-
-    if (user.reputation < cost) {
-      toast.error("Not enough reputation points");
-      return;
-    }
-
+  const handlePurchase = async (rewardId: number) => {
     try {
-      const res = await fetch('/api/rewards/purchase', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ rewardId })
-      });
-
-      if (!res.ok) throw new Error();
-
-      toast.success("Reward purchased successfully!");
-    } catch {
-      toast.error("Failed to purchase reward");
+      await apiRequest("POST", "/api/rewards/purchase", { rewardId });
+    } catch (error) {
+      console.error("Failed to purchase reward:", error);
     }
   };
 
-  return (
-    <div className="container mx-auto py-8">
-      <div className="flex justify-between items-center mb-8">
-        <h1 className="text-3xl font-bold">Rewards Store</h1>
-        {user && (
-          <div className="text-lg">
-            Available Points: <span className="font-bold text-primary">{user.reputation}</span>
-          </div>
-        )}
-      </div>
+  if (!rewards) return null;
 
-      {isLoading ? (
-        <div className="text-center">Loading rewards...</div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {Array.isArray(rewardItems) && rewardItems.map(reward => (
-            <Card key={reward.id}>
-              <CardContent className="p-6">
-                <div className="flex items-center gap-4 mb-4">
-                  {reward.icon && (
-                    <div className="text-3xl">{reward.icon}</div>
-                  )}
-                  <div>
-                    <h3 className="text-xl font-semibold">{reward.name}</h3>
-                    <p className="text-sm text-muted-foreground">{reward.type}</p>
-                  </div>
-                </div>
-                <p className="mb-4 text-muted-foreground">{reward.description}</p>
-                <div className="flex justify-between items-center">
-                  <div className="text-lg font-semibold">{reward.cost} points</div>
-                  <Button 
-                    onClick={() => purchaseReward(reward.id, reward.cost)}
-                    disabled={!user || user.reputation < reward.cost}
-                  >
-                    Purchase
-                  </Button>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
-    </div>
+  return (
+    <main className="container mx-auto py-8">
+      <h1 className="text-4xl font-bold mb-8">Rewards Store</h1>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {rewards.map((reward) => (
+          <Card key={reward.id} className="flex flex-col">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-2">
+                <span>{reward.icon}</span>
+                <span>{reward.name}</span>
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex-grow">
+              <p className="text-sm text-gray-600">{reward.description}</p>
+            </CardContent>
+            <CardFooter className="flex justify-between items-center">
+              <div className="text-sm font-semibold">{reward.cost} points</div>
+              <Button
+                onClick={() => handlePurchase(reward.id)}
+                disabled={!user || user.reputation < reward.cost}
+              >
+                Purchase
+              </Button>
+            </CardFooter>
+          </Card>
+        ))}
+      </div>
+    </main>
   );
 }

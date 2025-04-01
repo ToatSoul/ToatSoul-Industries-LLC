@@ -74,10 +74,10 @@ const pgSession = connectPgSimple(session);
 const { Pool } = pg;
 
 const pool = new Pool({
-  connectionString: "postgresql://neondb_owner:npg_x8FO0kTNwfGq@ep-cold-fog-a47md744.us-east-1.aws.neon.tech/neondb?sslmode=require",
-  ssl: {
-    rejectUnauthorized: false
-  }
+  connectionString: process.env.DATABASE_URL,
+  max: 20,
+  idleTimeoutMillis: 30000,
+  connectionTimeoutMillis: 2000,
 });
 
 app.use(session({
