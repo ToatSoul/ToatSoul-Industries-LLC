@@ -219,7 +219,7 @@ app.use(session({
 
   app.get('/api/auth/current-user', (req, res) => {
     if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Not authenticated' });
+      return res.status(401).json({ message: 'Unauthorized - Please log in to access this resource' });
     }
 
     res.json(req.user);

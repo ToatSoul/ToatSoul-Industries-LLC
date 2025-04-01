@@ -25,12 +25,19 @@ export function AuthProvider({ children }: AuthProviderProps) {
     const checkAuth = async () => {
       try {
         const response = await fetch("/api/auth/current-user", {
-          credentials: "include"
+          credentials: "include",
+          headers: {
+            "Accept": "application/json",
+            "Content-Type": "application/json"
+          }
         });
         
         if (response.ok) {
           const userData = await response.json();
           setUser(userData);
+        } else if (response.status !== 401) {
+          // Only log non-authentication errors
+          console.error("Auth check failed:", await response.text());
         }
       } catch (error) {
         console.error("Auth check failed:", error);
