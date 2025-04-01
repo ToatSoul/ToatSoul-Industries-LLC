@@ -74,16 +74,19 @@ const pgSession = connectPgSimple(session);
 const { Pool } = pg;
 
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 20,
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
+  connectionString: process.env.DATABASE_URL?.replace('.us-east-2', '-pooler.us-east-2'),
+  max: 10,
+  idleTimeoutMillis: 1000,
+  connectionTimeoutMillis: 5000,
+  allowExitOnIdle: true
 });
 
 app.use(session({
     store: new pgSession({
       pool,
-      tableName: 'user_sessions'
+      tableName: 'user_sessions',
+      createTableIfMissing: true,
+      pruneSessionInterval: 60
     }),
     secret: process.env.SESSION_SECRET || randomBytes(32).toString('hex'),
     resave: false,
