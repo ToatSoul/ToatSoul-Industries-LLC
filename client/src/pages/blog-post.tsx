@@ -12,7 +12,23 @@ export default function BlogPost() {
   const [, params] = useRoute("/blog/:slug");
   const { user } = useAuth();
   
-  const { data: post, isLoading } = useQuery({
+  interface BlogPostWithAuthor {
+    id: number;
+    title: string;
+    content: string;
+    slug: string;
+    userId: number;
+    published: boolean;
+    createdAt: string;
+    updatedAt: string;
+    author: {
+      id: number;
+      username: string;
+      name: string | null;
+    }
+  }
+
+  const { data: post, isLoading } = useQuery<BlogPostWithAuthor>({
     queryKey: [`/api/blog/${params?.slug}`],
     enabled: !!params?.slug,
   });

@@ -10,7 +10,23 @@ import { Plus } from "lucide-react";
 
 export default function Blog() {
   const { user } = useAuth();
-  const { data: posts, isLoading } = useQuery({
+  interface BlogPostWithAuthor {
+    id: number;
+    title: string;
+    content: string;
+    slug: string;
+    userId: number;
+    published: boolean;
+    createdAt: string;
+    updatedAt: string;
+    author: {
+      id: number;
+      username: string;
+      name: string | null;
+    }
+  }
+
+  const { data: posts, isLoading } = useQuery<BlogPostWithAuthor[]>({
     queryKey: ["/api/blog"],
   });
 
@@ -19,9 +35,7 @@ export default function Blog() {
     queryFn: async () => {
       if (!user) return false;
       try {
-        await fetch(`/api/blog/authors/${user.id}`, {
-          credentials: "include"
-        });
+        await apiRequest("GET", `/api/blog/authors/${user.id}`);
         return true;
       } catch {
         return false;
@@ -49,7 +63,7 @@ export default function Blog() {
       </div>
 
       <div className="grid gap-6">
-        {posts?.map((post) => (
+        {posts && posts.length > 0 ? posts.map((post: BlogPostWithAuthor) => (
           <article key={post.id} className="border rounded-lg p-6">
             <h2 className="text-2xl font-semibold mb-2">
               <Link href={`/blog/${post.slug}`} className="hover:text-primary">
@@ -61,7 +75,9 @@ export default function Blog() {
             </div>
             <p className="text-gray-600 line-clamp-3">{post.content}</p>
           </article>
-        ))}
+        )) : (
+          <p>No blog posts found.</p>
+        )}
       </div>
     </main>
   );

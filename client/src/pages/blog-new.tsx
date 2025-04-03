@@ -15,11 +15,12 @@ export default function NewBlogPost() {
 
   const createPost = useMutation({
     mutationFn: async () => {
-      return apiRequest("POST", "/api/blog", {
+      const response = await apiRequest("POST", "/api/blog", {
         title,
         content,
         published: true
       });
+      return response.json();
     },
     onSuccess: () => {
       toast({

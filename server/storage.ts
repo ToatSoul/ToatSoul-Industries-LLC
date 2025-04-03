@@ -6,7 +6,8 @@ import {
   files, type File, type InsertFile,
   votes, type Vote, type InsertVote,
   tags, type Tag, type InsertTag,
-  threadTags, type ThreadTag, type InsertThreadTag
+  threadTags, type ThreadTag, type InsertThreadTag,
+  rewardItems, userRewards, type RewardItem, type UserReward
 } from "@shared/schema";
 import crypto from "crypto";
 import { randomBytes } from "crypto";
@@ -63,29 +64,10 @@ export interface IStorage {
   validateUser(username: string, password: string): Promise<User | undefined>;
 
   // Reward operations
-  getRewardItems(): Promise<Reward[]>;
-  getRewardItem(id: number): Promise<Reward | undefined>;
+  getRewardItems(): Promise<RewardItem[]>;
+  getRewardItem(id: number): Promise<RewardItem | undefined>;
   createUserReward(data: { userId: number; rewardId: number }): Promise<UserReward>;
 }
-
-// Placeholder types - Replace with your actual types from schema
-import { rewardItems, userRewards } from "@shared/schema";
-
-async function getRewardItems() {
-  return await db.select().from(rewardItems);
-}
-
-async function getRewardItem(id: number) {
-  const items = await db.select().from(rewardItems).where(eq(rewardItems.id, id));
-  return items[0];
-}
-
-async function createUserReward(data: { userId: number; rewardId: number }) {
-  return await db.insert(userRewards).values(data).returning();
-}
-type UserReward = { userId: number; rewardId: number; createdAt: Date };
-
-
 export class MemStorage implements IStorage {
   private users: Map<number, User>;
   private categories: Map<number, Category>;
@@ -95,7 +77,7 @@ export class MemStorage implements IStorage {
   private votes: Map<number, Vote>;
   private tags: Map<number, Tag>;
   private threadTags: Map<number, ThreadTag>;
-  private rewards: Map<number, Reward>;
+  private rewards: Map<number, RewardItem>;
   private userRewards: Map<number, UserReward>;
 
 
@@ -161,7 +143,16 @@ export class MemStorage implements IStorage {
     ];
 
     for (const reward of rewards) {
-      this.rewards.set(this.rewardIdCounter++, reward);
+      const id = this.rewardIdCounter++;
+      const rewardItem: RewardItem = {
+        id,
+        name: reward.name,
+        description: reward.description,
+        type: reward.type,
+        cost: reward.cost,
+        icon: reward.icon
+      };
+      this.rewards.set(id, rewardItem);
     }
 
     // Create default tags
@@ -232,13 +223,15 @@ async createUser(user: InsertUser): Promise<User> {
     const hashedPassword = this.hashPassword(user.password);
 
     const newUser: User = {
-      ...user,
       id,
+      username: user.username,
       password: hashedPassword,
+      email: user.email,
+      name: user.name || null,
+      bio: null,
       reputation: 0,
-      isAdmin: false,
-      avatarUrl: undefined,
-      bio: undefined
+      avatarUrl: null,
+      isAdmin: false
     };
 
     this.users.set(id, newUser);
@@ -433,7 +426,10 @@ async createUser(user: InsertUser): Promise<User> {
       const now = new Date();
 
       const newVote: Vote = {
-        ...vote,
+        value: vote.value,
+        userId: vote.userId,
+        threadId: vote.threadId || null,
+        commentId: vote.commentId || null,
         id,
         createdAt: now
       };
@@ -488,17 +484,23 @@ async createUser(user: InsertUser): Promise<User> {
   }
 
   // Reward operations
-  async getRewardItems(): Promise<Reward[]> {
+  async getRewardItems(): Promise<RewardItem[]> {
     return Array.from(this.rewards.values());
   }
 
-  async getRewardItem(id: number): Promise<Reward | undefined> {
+  async getRewardItem(id: number): Promise<RewardItem | undefined> {
     return this.rewards.get(id);
   }
 
   async createUserReward({ userId, rewardId }: { userId: number; rewardId: number }): Promise<UserReward> {
     const id = this.userRewardIdCounter++;
-    const newReward: UserReward = { userId, rewardId, createdAt: new Date() };
+    const newReward: UserReward = { 
+      id,
+      userId, 
+      rewardId, 
+      createdAt: new Date(), 
+      active: true 
+    };
     this.userRewards.set(id, newReward);
     return newReward;
   }
