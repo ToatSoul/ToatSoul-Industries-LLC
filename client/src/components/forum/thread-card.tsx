@@ -4,7 +4,7 @@ import { Badge } from "@/components/ui/badge";
 import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 import { VoteButtons } from "@/components/forum/vote-buttons";
 import { formatDistanceToNow } from "date-fns";
-import { MessageSquare, Eye, PaperclipIcon } from "lucide-react";
+import { MessageSquare, Eye, Paperclip } from "lucide-react";
 import { Thread, User, Tag, File } from "@shared/schema";
 
 interface ThreadCardProps {
@@ -61,14 +61,12 @@ export function ThreadCard({ thread, onVote, userVote }: ThreadCardProps) {
             {/* Thread meta */}
             <div className="mt-4 flex flex-wrap items-center gap-4">
               <div className="flex items-center text-sm text-gray-500">
-                <Link href={`/profile/${thread.author.id}`}>
-                  <a className="flex items-center">
-                    <AvatarWithFallback 
-                      user={thread.author} 
-                      className="h-6 w-6 mr-2"
-                    />
-                    <span>By <span className="font-medium text-primary-600 hover:underline">{thread.author.name || thread.author.username}</span></span>
-                  </a>
+                <Link href={`/profile/${thread.author.id}`} className="flex items-center">
+                  <AvatarWithFallback 
+                    user={thread.author} 
+                    className="h-6 w-6 mr-2"
+                  />
+                  <span>By <span className="font-medium text-primary-600 hover:underline">{thread.author.name || thread.author.username}</span></span>
                 </Link>
               </div>
               
@@ -94,7 +92,7 @@ export function ThreadCard({ thread, onVote, userVote }: ThreadCardProps) {
             {thread.files && thread.files.length > 0 && (
               <div className="mt-4">
                 <div className="flex items-center text-sm text-gray-500">
-                  <PaperclipIcon className="h-4 w-4 mr-1" />
+                  <Paperclip className="h-4 w-4 mr-1" />
                   <span className="font-medium">
                     Attachments ({thread.files.length}):
                   </span>

@@ -13,8 +13,7 @@ export default function BlogPost() {
   const { user } = useAuth();
   
   const { data: post, isLoading } = useQuery({
-    queryKey: ["blog-post", params?.slug],
-    queryFn: () => apiRequest(`/api/blog/${params?.slug}`),
+    queryKey: [`/api/blog/${params?.slug}`],
     enabled: !!params?.slug,
   });
 

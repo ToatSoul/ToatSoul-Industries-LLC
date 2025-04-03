@@ -1,13 +1,13 @@
 import { Link, useLocation } from "wouter";
 import { useQuery } from "@tanstack/react-query";
-import { Category, User } from "@shared/schema";
+import { Category } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { AvatarWithFallback } from "@/components/ui/avatar-with-fallback";
 import { cn } from "@/lib/utils";
 
 // Icons for categories
-const getCategoryIcon = (icon?: string) => {
+const getCategoryIcon = (icon?: string | null) => {
   switch (icon) {
     case 'laptop-code':
       return (
@@ -53,14 +53,28 @@ interface CategorySidebarProps {
 }
 
 export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
-  const [location] = useLocation();
+  const [location, navigate] = useLocation();
 
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
   });
 
+  // Define a type for top contributors that matches the User schema but with partial fields
+  type TopContributor = {
+    id: number;
+    username: string;
+    name: string;
+    reputation: number;
+    avatarUrl?: string | null;
+    // Additional fields that would be in the User type but not used here are omitted
+    email?: string;
+    password?: string;
+    bio?: string | null;
+    isAdmin?: boolean;
+  };
+
   // This would normally be a real API call
-  const { data: topContributors, isLoading: contributorsLoading } = useQuery({
+  const { data: topContributors = [], isLoading: contributorsLoading } = useQuery<TopContributor[]>({
     queryKey: ['/api/users/top-contributors'],
     queryFn: async () => {
       // Since this is a demo, we'll return some mock data
@@ -94,18 +108,21 @@ export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
               ))
             ) : (
               categories?.map((category: Category) => (
-                <Link key={category.id} href={`/forums/category/${category.id}`} className={cn(
-                    "block p-4 hover:bg-gray-50",
-                    activeCategoryId === category.id && "bg-gray-100"
-                  )}>
-                    <div className="flex items-center">
-                      <div className="mr-3">{getCategoryIcon(category.icon)}</div>
-                      <div>
-                        <p className="font-medium text-gray-900 dark:text-white">{category.name}</p>
-                        <p className="text-sm text-gray-500">{category.description}</p>
-                      </div>
+                <div key={category.id} 
+                  className={cn(
+                    "block p-4 hover:bg-gray-50 cursor-pointer",
+                    activeCategoryId === category.id && "bg-gray-100 dark:bg-gray-800"
+                  )}
+                  onClick={() => navigate(`/forums/category/${category.id}`)}
+                >
+                  <div className="flex items-center">
+                    <div className="mr-3">{getCategoryIcon(category.icon)}</div>
+                    <div>
+                      <p className="font-medium text-gray-900 dark:text-white">{category.name}</p>
+                      <p className="text-sm text-gray-500 dark:text-gray-400">{category.description}</p>
                     </div>
-                  </Link>
+                  </div>
+                </div>
               ))
             )}
           </div>
@@ -131,7 +148,7 @@ export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
                 </div>
               ))
             ) : (
-              topContributors?.map((user: User & { reputation: number }) => (
+              topContributors?.map((user: TopContributor) => (
                 <div key={user.id} className="p-4 flex items-center">
                   <AvatarWithFallback user={user} className="h-10 w-10 mr-3" />
                   <div>

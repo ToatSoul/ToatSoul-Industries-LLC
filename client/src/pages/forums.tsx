@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/lib/auth";
 import { CategorySidebar } from "@/components/forum/category-sidebar";
 import { ThreadCard } from "@/components/forum/thread-card";
+import { Thread, User } from "@shared/schema";
 import {
   Select,
   SelectContent,
@@ -16,7 +17,7 @@ import { Input } from "@/components/ui/input";
 import { Search, ChevronLeft, ChevronRight } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
-import AuthModal from "@/components/auth-modal";
+import { AuthModal } from "@/components/auth/auth-modal";
 
 export default function Forums() {
   const [location, navigate] = useLocation();
@@ -74,11 +75,18 @@ export default function Forums() {
     }];
   };
 
+  interface ThreadWithMeta extends Thread {
+    author: User;
+    voteScore: number;
+    commentCount: number;
+    userVote?: { value: number };
+  }
+  
   const {
-    data: threads,
+    data: threads = [],
     isLoading: threadsLoading,
     isError: threadsError
-  } = useQuery({
+  } = useQuery<ThreadWithMeta[]>({
     queryKey: getQueryKey(),
   });
 
@@ -178,13 +186,14 @@ export default function Forums() {
                 </form>
               </div>
               <div className="mt-4 sm:mt-0">
-                <Button asChild className="sm:whitespace-nowrap">
-                  <Link href="/new-thread">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
-                    </svg>
-                    New Thread
-                  </Link>
+                <Button 
+                  className="sm:whitespace-nowrap"
+                  onClick={() => navigate('/new-thread')}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 5a1 1 0 011 1v3h3a1 1 0 110 2h-3v3a1 1 0 11-2 0v-3H6a1 1 0 110-2h3V6a1 1 0 011-1z" clipRule="evenodd" />
+                  </svg>
+                  New Thread
                 </Button>
               </div>
             </div>
@@ -271,7 +280,7 @@ export default function Forums() {
                     <p>Failed to load threads. Please try again later.</p>
                   </div>
                 ) : threads?.length > 0 ? (
-                  threads.map((thread: any) => (
+                  threads.map((thread: ThreadWithMeta) => (
                     <ThreadCard
                       key={thread.id}
                       thread={thread}
@@ -296,8 +305,8 @@ export default function Forums() {
                           Clear Search
                         </Button>
                       ) : (
-                        <Button asChild>
-                          <Link href="/new-thread">Create Thread</Link>
+                        <Button onClick={() => navigate('/new-thread')}>
+                          Create Thread
                         </Button>
                       )}
                     </div>

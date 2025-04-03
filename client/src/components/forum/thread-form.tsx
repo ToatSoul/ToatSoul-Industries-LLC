@@ -58,11 +58,11 @@ export function ThreadForm() {
   const [files, setFiles] = useState<File[]>([]);
   
   // Fetch categories and tags
-  const { data: categories, isLoading: categoriesLoading } = useQuery({
+  const { data: categories = [], isLoading: categoriesLoading } = useQuery<Category[]>({
     queryKey: ['/api/categories'],
   });
   
-  const { data: tags, isLoading: tagsLoading } = useQuery({
+  const { data: tags = [], isLoading: tagsLoading } = useQuery<Tag[]>({
     queryKey: ['/api/tags'],
   });
   

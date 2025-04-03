@@ -11,16 +11,17 @@ import { Plus } from "lucide-react";
 export default function Blog() {
   const { user } = useAuth();
   const { data: posts, isLoading } = useQuery({
-    queryKey: ["blog-posts"],
-    queryFn: () => apiRequest("/api/blog"),
+    queryKey: ["/api/blog"],
   });
 
   const { data: isAuthor } = useQuery({
-    queryKey: ["is-blog-author"],
+    queryKey: [`/api/blog/authors/${user?.id}`],
     queryFn: async () => {
       if (!user) return false;
       try {
-        await apiRequest(`/api/blog/authors/${user.id}`);
+        await fetch(`/api/blog/authors/${user.id}`, {
+          credentials: "include"
+        });
         return true;
       } catch {
         return false;

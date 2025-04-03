@@ -269,7 +269,12 @@ async createUser(user: InsertUser): Promise<User> {
 
   async createCategory(category: InsertCategory): Promise<Category> {
     const id = this.categoryIdCounter++;
-    const newCategory: Category = { ...category, id };
+    const newCategory: Category = { 
+      id,
+      name: category.name,
+      description: category.description ?? null,
+      icon: category.icon ?? null
+    };
     this.categories.set(id, newCategory);
     return newCategory;
   }

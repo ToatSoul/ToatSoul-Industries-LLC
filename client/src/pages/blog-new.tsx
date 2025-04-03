@@ -15,13 +15,10 @@ export default function NewBlogPost() {
 
   const createPost = useMutation({
     mutationFn: async () => {
-      return apiRequest("/api/blog", {
-        method: "POST",
-        body: JSON.stringify({
-          title,
-          content,
-          published: true
-        })
+      return apiRequest("POST", "/api/blog", {
+        title,
+        content,
+        published: true
       });
     },
     onSuccess: () => {
