@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { UserIntroduction } from "@/components/onboarding/user-introduction";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
@@ -47,6 +48,7 @@ export function SignupForm({ onSuccess, onToggleMode }: SignupFormProps) {
   const { register: authRegister } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showIntro, setShowIntro] = useState(false);
   
   const form = useForm<SignupFormValues>({
     resolver: zodResolver(signupSchema),
@@ -77,9 +79,7 @@ export function SignupForm({ onSuccess, onToggleMode }: SignupFormProps) {
         variant: "default",
       });
       
-      if (onSuccess) {
-        onSuccess();
-      }
+      setShowIntro(true);
     } catch (error: any) {
       toast({
         title: "Registration failed",
@@ -92,7 +92,18 @@ export function SignupForm({ onSuccess, onToggleMode }: SignupFormProps) {
   };
   
   return (
-    <Form {...form}>
+    <>
+      {showIntro && (
+        <UserIntroduction
+          onComplete={() => {
+            setShowIntro(false);
+            if (onSuccess) {
+              onSuccess();
+            }
+          }}
+        />
+      )}
+      <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
         <FormField
           control={form.control}
@@ -277,5 +288,6 @@ export function SignupForm({ onSuccess, onToggleMode }: SignupFormProps) {
         </div>
       )}
     </Form>
+    </>
   );
 }
