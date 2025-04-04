@@ -1,21 +1,40 @@
+
 import { useQuery } from "@tanstack/react-query";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useAuth } from "@/lib/auth";
 import { apiRequest } from "@/lib/queryClient";
+import { useToast } from "@/hooks/use-toast";
 
 export default function RewardsStore() {
   const { user } = useAuth();
+  const { toast } = useToast();
   const { data: rewards } = useQuery({
     queryKey: ["/api/rewards"],
-    enabled: !!user,
   });
 
   const handlePurchase = async (rewardId: number) => {
+    if (!user) {
+      toast({
+        title: "Authentication required",
+        description: "Please log in to purchase rewards",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       await apiRequest("POST", "/api/rewards/purchase", { rewardId });
-    } catch (error) {
-      console.error("Failed to purchase reward:", error);
+      toast({
+        title: "Success",
+        description: "Reward purchased successfully",
+      });
+    } catch (error: any) {
+      toast({
+        title: "Error purchasing reward",
+        description: error.message || "Failed to purchase reward",
+        variant: "destructive",
+      });
     }
   };
 
@@ -24,6 +43,11 @@ export default function RewardsStore() {
   return (
     <main className="container mx-auto py-8">
       <h1 className="text-4xl font-bold mb-8">Rewards Store</h1>
+      {!user && (
+        <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
+          <p className="text-yellow-800">Please log in to purchase rewards</p>
+        </div>
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {rewards.map((reward) => (
           <Card key={reward.id} className="flex flex-col">
@@ -40,9 +64,9 @@ export default function RewardsStore() {
               <div className="text-sm font-semibold">{reward.cost} points</div>
               <Button
                 onClick={() => handlePurchase(reward.id)}
-                disabled={!user || user.reputation < reward.cost}
+                disabled={!user || (user && user.reputation < reward.cost)}
               >
-                Purchase
+                {!user ? "Login to Purchase" : "Purchase"}
               </Button>
             </CardFooter>
           </Card>
