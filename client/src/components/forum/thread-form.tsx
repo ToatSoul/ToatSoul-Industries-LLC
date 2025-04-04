@@ -66,12 +66,14 @@ export function ThreadForm() {
     queryKey: ['/api/tags'],
   });
   
+  const [, params] = useRoute("/new-thread?category=:categoryId");
+  
   const form = useForm<ThreadFormValues>({
     resolver: zodResolver(threadFormSchema),
     defaultValues: {
       title: "",
       content: "",
-      categoryId: "",
+      categoryId: params?.categoryId || "",
       tagIds: [],
     },
   });

@@ -113,7 +113,7 @@ export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
                     "block p-4 hover:bg-gray-50 cursor-pointer",
                     activeCategoryId === category.id && "bg-gray-100 dark:bg-gray-800"
                   )}
-                  onClick={() => navigate(`/forums/category/${category.id}`)}
+                  onClick={() => navigate(`/new-thread?category=${category.id}`)}
                 >
                   <div className="flex items-center">
                     <div className="mr-3">{getCategoryIcon(category.icon)}</div>
