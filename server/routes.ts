@@ -93,8 +93,12 @@ app.use(session({
     saveUninitialized: false,
     cookie: { 
       secure: process.env.NODE_ENV === 'production',
-      maxAge: 30 * 24 * 60 * 60 * 1000 // 30 days
-    }
+      maxAge: 30 * 24 * 60 * 60 * 1000, // 30 days
+      sameSite: 'lax'
+    },
+    rolling: true, // Refresh session with each request
+    saveUninitialized: false,
+    resave: false
   }));
 
   app.use(passport.initialize());

@@ -42,7 +42,7 @@ export function LoginForm({ onSuccess, onToggleMode }: LoginFormProps) {
   const { login } = useAuth();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const form = useForm<LoginFormValues>({
     resolver: zodResolver(loginSchema),
     defaultValues: {
@@ -51,10 +51,10 @@ export function LoginForm({ onSuccess, onToggleMode }: LoginFormProps) {
       rememberMe: false,
     },
   });
-  
+
   const onSubmit = async (data: LoginFormValues) => {
     setIsLoading(true);
-    
+
     try {
       await login(data.username, data.password);
       toast({
@@ -62,7 +62,7 @@ export function LoginForm({ onSuccess, onToggleMode }: LoginFormProps) {
         description: "Welcome back to ToastSoul Industries!",
         variant: "default",
       });
-      
+
       if (onSuccess) {
         onSuccess();
       }
@@ -76,7 +76,7 @@ export function LoginForm({ onSuccess, onToggleMode }: LoginFormProps) {
       setIsLoading(false);
     }
   };
-  
+
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -98,7 +98,7 @@ export function LoginForm({ onSuccess, onToggleMode }: LoginFormProps) {
             </FormItem>
           )}
         />
-        
+
         <FormField
           control={form.control}
           name="password"
@@ -118,7 +118,7 @@ export function LoginForm({ onSuccess, onToggleMode }: LoginFormProps) {
             </FormItem>
           )}
         />
-        
+
         <div className="flex items-center justify-between">
           <FormField
             control={form.control}
@@ -142,17 +142,17 @@ export function LoginForm({ onSuccess, onToggleMode }: LoginFormProps) {
               </FormItem>
             )}
           />
-          
+
           <Button variant="link" className="text-sm font-medium text-primary-600 p-0 h-auto">
             Forgot your password?
           </Button>
         </div>
-        
+
         <Button type="submit" className="w-full" disabled={isLoading}>
           {isLoading ? "Logging in..." : "Log in"}
         </Button>
       </form>
-      
+
       <div className="mt-6">
         <div className="relative">
           <div className="absolute inset-0 flex items-center">
@@ -164,7 +164,7 @@ export function LoginForm({ onSuccess, onToggleMode }: LoginFormProps) {
             </span>
           </div>
         </div>
-        
+
         <div className="mt-6 grid grid-cols-2 gap-3">
           <Button variant="outline" type="button" disabled={isLoading} className="h-10">
             <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24">
@@ -186,7 +186,7 @@ export function LoginForm({ onSuccess, onToggleMode }: LoginFormProps) {
           </Button>
         </div>
       </div>
-      
+
       {onToggleMode && (
         <div className="mt-6 text-center">
           <span className="text-sm text-gray-600">Don't have an account?</span>
