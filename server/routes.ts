@@ -141,7 +141,7 @@ app.use(session({
 
   // Middleware to check if user is authenticated
   const isAuthenticated = (req: Request, res: Response, next: any) => {
-    if (req.isAuthenticated()) {
+    if (req.isAuthenticated() && req.user) {
       return next();
     }
 
@@ -224,11 +224,7 @@ app.use(session({
     });
   });
 
-  app.get('/api/auth/current-user', (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: 'Unauthorized - Please log in to access this resource' });
-    }
-
+  app.get('/api/auth/current-user', isAuthenticated, (req, res) => {
     res.json(req.user);
   });
 
