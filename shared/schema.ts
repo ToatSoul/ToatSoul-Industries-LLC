@@ -1,5 +1,6 @@
-import { pgTable, text, serial, integer, boolean, timestamp } from "drizzle-orm/pg-core";
+import { pgTable, text, serial, integer, boolean, timestamp, foreignKey, uniqueIndex } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
+import { relations } from "drizzle-orm";
 import { z } from "zod";
 
 // User schema
@@ -41,8 +42,8 @@ export const threads = pgTable("threads", {
   id: serial("id").primaryKey(),
   title: text("title").notNull(),
   content: text("content").notNull(),
-  userId: integer("user_id").notNull(),
-  categoryId: integer("category_id").notNull(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  categoryId: integer("category_id").notNull().references(() => categories.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
   views: integer("views").default(0).notNull(),
@@ -59,8 +60,8 @@ export const insertThreadSchema = createInsertSchema(threads).pick({
 export const comments = pgTable("comments", {
   id: serial("id").primaryKey(),
   content: text("content").notNull(),
-  userId: integer("user_id").notNull(),
-  threadId: integer("thread_id").notNull(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  threadId: integer("thread_id").notNull().references(() => threads.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -77,8 +78,8 @@ export const files = pgTable("files", {
   originalFilename: text("original_filename").notNull(),
   mimeType: text("mime_type").notNull(),
   size: integer("size").notNull(),
-  threadId: integer("thread_id").notNull(),
-  userId: integer("user_id").notNull(),
+  threadId: integer("thread_id").notNull().references(() => threads.id, { onDelete: "cascade" }),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -94,10 +95,16 @@ export const insertFileSchema = createInsertSchema(files).pick({
 export const votes = pgTable("votes", {
   id: serial("id").primaryKey(),
   value: integer("value").notNull(), // 1 for upvote, -1 for downvote
-  userId: integer("user_id").notNull(),
-  threadId: integer("thread_id"),
-  commentId: integer("comment_id"),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  threadId: integer("thread_id").references(() => threads.id, { onDelete: "cascade" }),
+  commentId: integer("comment_id").references(() => comments.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
+}, (table) => {
+  return {
+    // Create unique indexes to ensure a user can only vote once per thread or comment
+    userThreadVote: uniqueIndex("user_thread_vote_idx").on(table.userId, table.threadId),
+    userCommentVote: uniqueIndex("user_comment_vote_idx").on(table.userId, table.commentId)
+  };
 });
 
 export const insertVoteSchema = createInsertSchema(votes).pick({
@@ -122,8 +129,12 @@ export const insertTagSchema = createInsertSchema(tags).pick({
 // Thread-tag relationship
 export const threadTags = pgTable("thread_tags", {
   id: serial("id").primaryKey(),
-  threadId: integer("thread_id").notNull(),
-  tagId: integer("tag_id").notNull(),
+  threadId: integer("thread_id").notNull().references(() => threads.id, { onDelete: "cascade" }),
+  tagId: integer("tag_id").notNull().references(() => tags.id, { onDelete: "cascade" }),
+}, (table) => {
+  return {
+    threadTagUnique: uniqueIndex("thread_tag_unique_idx").on(table.threadId, table.tagId)
+  };
 });
 
 export const insertThreadTagSchema = createInsertSchema(threadTags).pick({
@@ -169,8 +180,8 @@ export const rewardItems = pgTable("reward_items", {
 // User rewards schema
 export const userRewards = pgTable("user_rewards", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull(),
-  rewardId: integer("reward_id").notNull(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  rewardId: integer("reward_id").notNull().references(() => rewardItems.id, { onDelete: "cascade" }),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   active: boolean("active").default(true).notNull(),
 });
@@ -187,7 +198,7 @@ export const blogPosts = pgTable("blog_posts", {
   title: text("title").notNull(),
   content: text("content").notNull(),
   slug: text("slug").notNull().unique(),
-  userId: integer("user_id").notNull(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }),
   published: boolean("published").default(false).notNull(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at").defaultNow().notNull(),
@@ -196,7 +207,7 @@ export const blogPosts = pgTable("blog_posts", {
 // Blog author permissions schema
 export const blogAuthors = pgTable("blog_authors", {
   id: serial("id").primaryKey(),
-  userId: integer("user_id").notNull().unique(),
+  userId: integer("user_id").notNull().references(() => users.id, { onDelete: "cascade" }).unique(),
   createdAt: timestamp("created_at").defaultNow().notNull(),
 });
 
@@ -214,3 +225,102 @@ export const insertBlogAuthorSchema = createInsertSchema(blogAuthors).pick({
 
 export type BlogPost = typeof blogPosts.$inferSelect;
 export type BlogAuthor = typeof blogAuthors.$inferSelect;
+
+// Define relations between tables
+export const usersRelations = relations(users, ({ many }) => ({
+  threads: many(threads),
+  comments: many(comments),
+  votes: many(votes),
+  files: many(files),
+  userRewards: many(userRewards),
+  blogPosts: many(blogPosts),
+}));
+
+export const threadsRelations = relations(threads, ({ one, many }) => ({
+  author: one(users, {
+    fields: [threads.userId],
+    references: [users.id],
+  }),
+  category: one(categories, {
+    fields: [threads.categoryId],
+    references: [categories.id],
+  }),
+  comments: many(comments),
+  files: many(files),
+  votes: many(votes),
+  tags: many(threadTags),
+}));
+
+export const commentsRelations = relations(comments, ({ one, many }) => ({
+  author: one(users, {
+    fields: [comments.userId],
+    references: [users.id],
+  }),
+  thread: one(threads, {
+    fields: [comments.threadId],
+    references: [threads.id],
+  }),
+  votes: many(votes),
+}));
+
+export const votesRelations = relations(votes, ({ one }) => ({
+  user: one(users, {
+    fields: [votes.userId],
+    references: [users.id],
+  }),
+  thread: one(threads, {
+    fields: [votes.threadId],
+    references: [threads.id],
+  }),
+  comment: one(comments, {
+    fields: [votes.commentId],
+    references: [comments.id],
+  }),
+}));
+
+export const filesRelations = relations(files, ({ one }) => ({
+  uploader: one(users, {
+    fields: [files.userId],
+    references: [users.id],
+  }),
+  thread: one(threads, {
+    fields: [files.threadId],
+    references: [threads.id],
+  }),
+}));
+
+export const threadTagsRelations = relations(threadTags, ({ one }) => ({
+  thread: one(threads, {
+    fields: [threadTags.threadId],
+    references: [threads.id],
+  }),
+  tag: one(tags, {
+    fields: [threadTags.tagId], 
+    references: [tags.id],
+  }),
+}));
+
+export const userRewardsRelations = relations(userRewards, ({ one }) => ({
+  user: one(users, {
+    fields: [userRewards.userId],
+    references: [users.id],
+  }),
+  reward: one(rewardItems, {
+    fields: [userRewards.rewardId],
+    references: [rewardItems.id],
+  }),
+}));
+
+export const blogPostsRelations = relations(blogPosts, ({ one }) => ({
+  author: one(users, {
+    fields: [blogPosts.userId],
+    references: [users.id],
+  }),
+}));
+
+export const blogAuthorsRelations = relations(blogAuthors, ({ one }) => ({
+  user: one(users, {
+    fields: [blogAuthors.userId],
+    references: [users.id],
+  }),
+}));

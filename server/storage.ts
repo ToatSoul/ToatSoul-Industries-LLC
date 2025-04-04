@@ -7,30 +7,24 @@ import {
   votes, type Vote, type InsertVote,
   tags, type Tag, type InsertTag,
   threadTags, type ThreadTag, type InsertThreadTag,
-  rewardItems, userRewards, type RewardItem, type UserReward
+  rewardItems, userRewards, type RewardItem, type UserReward,
+  blogPosts, blogAuthors, type BlogPost, type BlogAuthor
 } from "@shared/schema";
 import crypto from "crypto";
-import { drizzle } from 'drizzle-orm/node-postgres';
-import { eq, and } from 'drizzle-orm';
-import pg from 'pg';
-const { Pool } = pg;
-import { generateToken } from './tokenUtils'; // Assuming this function is in tokenUtils.js
-import { hashPassword } from './passwordUtils'; // Assuming this function is in passwordUtils.js
-import nodemailer from 'nodemailer'; // Import nodemailer
+import { eq, and, like, sql, or } from 'drizzle-orm';
+import { db } from './db';
+import { generateToken } from './tokenUtils';
+import { hashPassword } from './passwordUtils';
+import nodemailer from 'nodemailer';
 
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL?.replace('.us-east-2', '-pooler.us-east-2'),
-  max: 10
-});
-
-const db = drizzle(pool);
-
-// Create a transporter object using your email provider's credentials.  Replace with your actual credentials.
+// Create a transporter object using SMTP settings
 const transporter = nodemailer.createTransport({
-  service: 'YOUR_EMAIL_SERVICE', // e.g., 'gmail', 'outlook'
+  host: process.env.SMTP_HOST || 'smtp.example.com',
+  port: parseInt(process.env.SMTP_PORT || '587'),
+  secure: process.env.SMTP_SECURE === 'true',
   auth: {
-    user: process.env.EMAIL_USER,
-    pass: process.env.EMAIL_PASSWORD,
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASSWORD,
   },
 });
 
