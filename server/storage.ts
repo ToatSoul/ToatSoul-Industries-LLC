@@ -10,11 +10,17 @@ import {
   rewardItems, userRewards, type RewardItem, type UserReward
 } from "@shared/schema";
 import crypto from "crypto";
-import { randomBytes } from "crypto";
-import path from "path";
-import fs from "fs/promises";
+import { drizzle } from 'drizzle-orm/node-postgres';
+import { eq, and } from 'drizzle-orm';
+import { Pool } from 'pg';
 
-// Interface for storage operations
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL?.replace('.us-east-2', '-pooler.us-east-2'),
+  max: 10
+});
+
+const db = drizzle(pool);
+
 export interface IStorage {
   // User operations
   getUser(id: number): Promise<User | undefined>;
@@ -68,413 +74,215 @@ export interface IStorage {
   getRewardItem(id: number): Promise<RewardItem | undefined>;
   createUserReward(data: { userId: number; rewardId: number }): Promise<UserReward>;
 }
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private categories: Map<number, Category>;
-  private threads: Map<number, Thread>;
-  private comments: Map<number, Comment>;
-  private files: Map<number, File>;
-  private votes: Map<number, Vote>;
-  private tags: Map<number, Tag>;
-  private threadTags: Map<number, ThreadTag>;
-  private rewards: Map<number, RewardItem>;
-  private userRewards: Map<number, UserReward>;
 
-
-  private userIdCounter: number;
-  private categoryIdCounter: number;
-  private threadIdCounter: number;
-  private commentIdCounter: number;
-  private fileIdCounter: number;
-  private voteIdCounter: number;
-  private tagIdCounter: number;
-  private threadTagIdCounter: number;
-  private rewardIdCounter: number;
-  private userRewardIdCounter: number;
-
-  constructor() {
-    this.users = new Map();
-    this.categories = new Map();
-    this.threads = new Map();
-    this.comments = new Map();
-    this.files = new Map();
-    this.votes = new Map();
-    this.tags = new Map();
-    this.threadTags = new Map();
-    this.rewards = new Map();
-    this.userRewards = new Map();
-
-    this.userIdCounter = 1;
-    this.categoryIdCounter = 1;
-    this.threadIdCounter = 1;
-    this.commentIdCounter = 1;
-    this.fileIdCounter = 1;
-    this.voteIdCounter = 1;
-    this.tagIdCounter = 1;
-    this.threadTagIdCounter = 1;
-    this.rewardIdCounter = 1;
-    this.userRewardIdCounter = 1;
-
-    // Initialize with default data
-    this.initializeData();
-  }
-
-  private async initializeData() {
-    // Create default categories
-    const categories = [
-      { name: "Development", description: "Programming, Web, Mobile", icon: "laptop-code" },
-      { name: "Design", description: "UI/UX, Graphics, Illustration", icon: "paint-brush" },
-      { name: "General Discussion", description: "Industry News, Careers", icon: "globe" },
-      { name: "Help & Support", description: "Questions, Troubleshooting", icon: "question-circle" },
-      { name: "Announcements", description: "Updates, Events", icon: "bullhorn" }
-    ];
-
-    for (const category of categories) {
-      await this.createCategory(category);
-    }
-
-    // Initialize default rewards
-    const rewards = [
-      { name: "Gold Star Badge", description: "Show off your expertise with a shiny gold star!", type: "badge", cost: 100, icon: "⭐" },
-      { name: "Expert Title", description: "Get the 'Expert' title displayed on your profile", type: "title", cost: 250, icon: "👑" },
-      { name: "Rainbow Name", description: "Make your username appear in rainbow colors", type: "style", cost: 500, icon: "🌈" },
-      { name: "Custom Banner", description: "Add a custom banner to your profile", type: "banner", cost: 750, icon: "🎨" },
-      { name: "Verified Badge", description: "Get a special verified badge next to your name", type: "badge", cost: 1000, icon: "✓" }
-    ];
-
-    for (const reward of rewards) {
-      const id = this.rewardIdCounter++;
-      const rewardItem: RewardItem = {
-        id,
-        name: reward.name,
-        description: reward.description,
-        type: reward.type,
-        cost: reward.cost,
-        icon: reward.icon
-      };
-      this.rewards.set(id, rewardItem);
-    }
-
-    // Create default tags
-    const tags = [
-      { name: "Announcement", color: "#22c55e" },
-      { name: "Question", color: "#eab308" },
-      { name: "Discussion", color: "#3b82f6" },
-      { name: "Resource", color: "#a855f7" }
-    ];
-
-    for (const tag of tags) {
-      await this.createTag(tag);
-    }
-  }
-
-  // Helper function to hash passwords
+export class PostgresStorage implements IStorage {
   private hashPassword(password: string): string {
     return crypto.createHash('sha256').update(password).digest('hex');
   }
 
-  // User operations
   async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+    const results = await db.select().from(users).where(eq(users.id, id));
+    return results[0];
   }
 
   async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username.toLowerCase() === username.toLowerCase()
-    );
+    const results = await db.select().from(users).where(eq(users.username, username));
+    return results[0];
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email.toLowerCase() === email.toLowerCase()
-    );
+    const results = await db.select().from(users).where(eq(users.email, email));
+    return results[0];
   }
 
-  async updateUser(id: number, userData: Partial<User>): Promise<User> {
-    const user = await this.getUser(id);
-    if (!user) throw new Error('User not found');
-    
-    const updatedUser: User = {
-      ...user,
-      ...userData,
-      id, // Ensure ID doesn't change
-      password: user.password // Don't allow password updates through this method
-    };
-    
-    this.users.set(id, updatedUser);
-    return updatedUser;
-  }
-
-  async setUserAsAdmin(username: string): Promise<User> {
-    const user = await this.getUserByUsername(username);
-    if (!user) throw new Error('User not found');
-    
-    const updatedUser: User = {
-      ...user,
-      isAdmin: true
-    };
-    
-    this.users.set(user.id, updatedUser);
-    return updatedUser;
-  }
-
-async createUser(user: InsertUser): Promise<User> {
-    const id = this.userIdCounter++;
+  async createUser(user: InsertUser): Promise<User> {
     const hashedPassword = this.hashPassword(user.password);
-
-    const newUser: User = {
-      id,
-      username: user.username,
+    const results = await db.insert(users).values({
+      ...user,
       password: hashedPassword,
-      email: user.email,
-      name: user.name || null,
-      bio: null,
       reputation: 0,
-      avatarUrl: null,
       isAdmin: false
-    };
-
-    this.users.set(id, newUser);
-    return newUser;
+    }).returning();
+    return results[0];
   }
 
   async updateUserReputation(id: number, amount: number): Promise<User | undefined> {
     const user = await this.getUser(id);
     if (!user) return undefined;
 
-    const updatedUser: User = {
-      ...user,
-      reputation: user.reputation + amount
-    };
-
-    this.users.set(id, updatedUser);
-    return updatedUser;
+    const results = await db
+      .update(users)
+      .set({ reputation: user.reputation + amount })
+      .where(eq(users.id, id))
+      .returning();
+    return results[0];
   }
 
-  // Category operations
   async getCategories(): Promise<Category[]> {
-    return Array.from(this.categories.values());
+    return db.select().from(categories);
   }
 
   async getCategory(id: number): Promise<Category | undefined> {
-    return this.categories.get(id);
+    const results = await db.select().from(categories).where(eq(categories.id, id));
+    return results[0];
   }
 
   async createCategory(category: InsertCategory): Promise<Category> {
-    const id = this.categoryIdCounter++;
-    const newCategory: Category = { 
-      id,
-      name: category.name,
-      description: category.description ?? null,
-      icon: category.icon ?? null
-    };
-    this.categories.set(id, newCategory);
-    return newCategory;
+    const results = await db.insert(categories).values(category).returning();
+    return results[0];
   }
 
-  // Thread operations
   async getThreads(options: { categoryId?: number, limit?: number, offset?: number } = {}): Promise<Thread[]> {
-    let threads = Array.from(this.threads.values());
+    let query = db.select().from(threads);
 
-    // Filter by category if provided
     if (options.categoryId) {
-      threads = threads.filter(thread => thread.categoryId === options.categoryId);
+      query = query.where(eq(threads.categoryId, options.categoryId));
     }
 
-    // Sort by creation date (newest first)
-    threads.sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime());
-
-    // Apply pagination
-    if (options.offset !== undefined && options.limit !== undefined) {
-      threads = threads.slice(options.offset, options.offset + options.limit);
+    if (options.limit) {
+      query = query.limit(options.limit);
     }
 
-    return threads;
+    if (options.offset) {
+      query = query.offset(options.offset);
+    }
+
+    return query;
   }
 
   async getThread(id: number): Promise<Thread | undefined> {
-    return this.threads.get(id);
+    const results = await db.select().from(threads).where(eq(threads.id, id));
+    return results[0];
   }
 
   async createThread(thread: InsertThread): Promise<Thread> {
-    const id = this.threadIdCounter++;
-    const now = new Date();
-
-    const newThread: Thread = {
+    const results = await db.insert(threads).values({
       ...thread,
-      id,
-      createdAt: now,
-      updatedAt: now,
-      views: 0
-    };
-
-    this.threads.set(id, newThread);
-    return newThread;
+      views: 0,
+      createdAt: new Date(),
+      updatedAt: new Date()
+    }).returning();
+    return results[0];
   }
 
   async updateThreadViews(id: number): Promise<Thread | undefined> {
     const thread = await this.getThread(id);
     if (!thread) return undefined;
 
-    const updatedThread: Thread = {
-      ...thread,
-      views: thread.views + 1
-    };
-
-    this.threads.set(id, updatedThread);
-    return updatedThread;
+    const results = await db
+      .update(threads)
+      .set({ views: thread.views + 1 })
+      .where(eq(threads.id, id))
+      .returning();
+    return results[0];
   }
 
   async searchThreads(query: string): Promise<Thread[]> {
-    const lowercaseQuery = query.toLowerCase();
-    return Array.from(this.threads.values()).filter(thread =>
-      thread.title.toLowerCase().includes(lowercaseQuery) ||
-      thread.content.toLowerCase().includes(lowercaseQuery)
-    );
+      const lowercaseQuery = query.toLowerCase();
+      return db.select().from(threads).where(
+          (thread) => thread.title.toLowerCase().like(`%${lowercaseQuery}%`) || thread.content.toLowerCase().like(`%${lowercaseQuery}%`)
+      );
   }
 
-  // Comment operations
   async getCommentsByThreadId(threadId: number): Promise<Comment[]> {
-    return Array.from(this.comments.values())
-      .filter(comment => comment.threadId === threadId)
-      .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
+    return db.select().from(comments).where(eq(comments.threadId, threadId));
   }
 
   async createComment(comment: InsertComment): Promise<Comment> {
-    const id = this.commentIdCounter++;
-    const now = new Date();
-
-    const newComment: Comment = {
+    const results = await db.insert(comments).values({
       ...comment,
-      id,
-      createdAt: now
-    };
-
-    this.comments.set(id, newComment);
-    return newComment;
+      createdAt: new Date()
+    }).returning();
+    return results[0];
   }
 
-  // File operations
   async getFilesByThreadId(threadId: number): Promise<File[]> {
-    return Array.from(this.files.values())
-      .filter(file => file.threadId === threadId);
+    return db.select().from(files).where(eq(files.threadId, threadId));
   }
 
   async createFile(file: InsertFile & { filename: string }): Promise<File> {
-    const id = this.fileIdCounter++;
-    const now = new Date();
-
-    const newFile: File = {
+    const results = await db.insert(files).values({
       ...file,
-      id,
-      createdAt: now
-    };
-
-    this.files.set(id, newFile);
-    return newFile;
+      createdAt: new Date()
+    }).returning();
+    return results[0];
   }
 
   async getFile(id: number): Promise<File | undefined> {
-    return this.files.get(id);
+    const results = await db.select().from(files).where(eq(files.id, id));
+    return results[0];
   }
 
-  // Vote operations
   async getVotesByThreadId(threadId: number): Promise<Vote[]> {
-    return Array.from(this.votes.values())
-      .filter(vote => vote.threadId === threadId);
+    return db.select().from(votes).where(eq(votes.threadId, threadId));
   }
 
   async getVotesByCommentId(commentId: number): Promise<Vote[]> {
-    return Array.from(this.votes.values())
-      .filter(vote => vote.commentId === commentId);
+    return db.select().from(votes).where(eq(votes.commentId, commentId));
   }
 
   async getUserVoteOnThread(userId: number, threadId: number): Promise<Vote | undefined> {
-    return Array.from(this.votes.values()).find(
-      vote => vote.userId === userId && vote.threadId === threadId
+    const results = await db.select().from(votes).where(
+      and(eq(votes.userId, userId), eq(votes.threadId, threadId))
     );
+    return results[0];
   }
 
   async getUserVoteOnComment(userId: number, commentId: number): Promise<Vote | undefined> {
-    return Array.from(this.votes.values()).find(
-      vote => vote.userId === userId && vote.commentId === commentId
+    const results = await db.select().from(votes).where(
+      and(eq(votes.userId, userId), eq(votes.commentId, commentId))
     );
+    return results[0];
   }
 
   async createOrUpdateVote(vote: InsertVote): Promise<Vote> {
-    // Check if user already voted on this thread/comment
-    let existingVote: Vote | undefined;
-
-    if (vote.threadId) {
-      existingVote = await this.getUserVoteOnThread(vote.userId, vote.threadId);
-    } else if (vote.commentId) {
-      existingVote = await this.getUserVoteOnComment(vote.userId, vote.commentId!);
-    }
+    const existingVote = vote.threadId
+      ? await this.getUserVoteOnThread(vote.userId, vote.threadId)
+      : await this.getUserVoteOnComment(vote.userId, vote.commentId!);
 
     if (existingVote) {
-      // Update existing vote
-      const updatedVote: Vote = {
-        ...existingVote,
-        value: vote.value
-      };
-
-      this.votes.set(existingVote.id, updatedVote);
-      return updatedVote;
+      const results = await db
+        .update(votes)
+        .set({ value: vote.value })
+        .where(eq(votes.id, existingVote.id))
+        .returning();
+      return results[0];
     } else {
-      // Create new vote
-      const id = this.voteIdCounter++;
-      const now = new Date();
-
-      const newVote: Vote = {
-        value: vote.value,
-        userId: vote.userId,
-        threadId: vote.threadId || null,
-        commentId: vote.commentId || null,
-        id,
-        createdAt: now
-      };
-
-      this.votes.set(id, newVote);
-      return newVote;
+      const results = await db.insert(votes).values({
+        ...vote,
+        createdAt: new Date()
+      }).returning();
+      return results[0];
     }
   }
 
-  // Tag operations
   async getTags(): Promise<Tag[]> {
-    return Array.from(this.tags.values());
+    return db.select().from(tags);
   }
 
   async getTag(id: number): Promise<Tag | undefined> {
-    return this.tags.get(id);
+    const results = await db.select().from(tags).where(eq(tags.id, id));
+    return results[0];
   }
 
   async createTag(tag: InsertTag): Promise<Tag> {
-    const id = this.tagIdCounter++;
-    const newTag: Tag = { ...tag, id };
-    this.tags.set(id, newTag);
-    return newTag;
+    const results = await db.insert(tags).values(tag).returning();
+    return results[0];
   }
 
-  // Thread-Tag operations
   async getTagsByThreadId(threadId: number): Promise<Tag[]> {
-    const threadTagRelations = Array.from(this.threadTags.values())
-      .filter(threadTag => threadTag.threadId === threadId);
-
-    const tagIds = threadTagRelations.map(relation => relation.tagId);
-    return Array.from(this.tags.values())
-      .filter(tag => tagIds.includes(tag.id));
+    const results = await db.select({tag: tags.name, tagId: tags.id}).from(tags).innerJoin(threadTags, eq(threadTags.tagId, tags.id)).where(eq(threadTags.threadId, threadId));
+    return results;
   }
 
   async addTagToThread(threadTag: InsertThreadTag): Promise<ThreadTag> {
-    const id = this.threadTagIdCounter++;
-    const newThreadTag: ThreadTag = { ...threadTag, id };
-    this.threadTags.set(id, newThreadTag);
-    return newThreadTag;
+    const results = await db.insert(threadTags).values(threadTag).returning();
+    return results[0];
   }
 
-  // User authentication
   async validateUser(username: string, password: string): Promise<User | undefined> {
-    const user = await this.getUserByUsername(username);
+    const results = await db.select().from(users).where(eq(users.username, username));
+    const user = results[0];
     if (!user) return undefined;
 
     const hashedPassword = this.hashPassword(password);
@@ -483,28 +291,24 @@ async createUser(user: InsertUser): Promise<User> {
     return user;
   }
 
-  // Reward operations
   async getRewardItems(): Promise<RewardItem[]> {
-    return Array.from(this.rewards.values());
+    return db.select().from(rewardItems);
   }
 
   async getRewardItem(id: number): Promise<RewardItem | undefined> {
-    return this.rewards.get(id);
+    const results = await db.select().from(rewardItems).where(eq(rewardItems.id, id));
+    return results[0];
   }
 
   async createUserReward({ userId, rewardId }: { userId: number; rewardId: number }): Promise<UserReward> {
-    const id = this.userRewardIdCounter++;
-    const newReward: UserReward = { 
-      id,
-      userId, 
-      rewardId, 
-      createdAt: new Date(), 
-      active: true 
-    };
-    this.userRewards.set(id, newReward);
-    return newReward;
+    const results = await db.insert(userRewards).values({
+      userId,
+      rewardId,
+      createdAt: new Date(),
+      active: true
+    }).returning();
+    return results[0];
   }
 }
 
-
-export const storage = new MemStorage();
+export const storage = new PostgresStorage();
