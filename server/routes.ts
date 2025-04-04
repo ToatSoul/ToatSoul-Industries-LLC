@@ -232,6 +232,44 @@ app.use(session({
     res.json(req.user);
   });
 
+  app.get('/api/auth/verify-email', async (req, res) => {
+    const { token } = req.query;
+    if (!token || typeof token !== 'string') {
+      return res.status(400).json({ message: 'Invalid verification token' });
+    }
+
+    const success = await storage.verifyEmail(token);
+    if (success) {
+      res.json({ message: 'Email verified successfully' });
+    } else {
+      res.status(400).json({ message: 'Invalid or expired verification token' });
+    }
+  });
+
+  app.post('/api/auth/forgot-password', async (req, res) => {
+    const { email } = req.body;
+    if (!email) {
+      return res.status(400).json({ message: 'Email is required' });
+    }
+
+    await storage.createPasswordReset(email);
+    res.json({ message: 'If an account exists with this email, a password reset link has been sent' });
+  });
+
+  app.post('/api/auth/reset-password', async (req, res) => {
+    const { token, newPassword } = req.body;
+    if (!token || !newPassword) {
+      return res.status(400).json({ message: 'Token and new password are required' });
+    }
+
+    const success = await storage.resetPassword(token, newPassword);
+    if (success) {
+      res.json({ message: 'Password reset successfully' });
+    } else {
+      res.status(400).json({ message: 'Invalid or expired reset token' });
+    }
+  });
+
   app.post("/api/auth/set-admin", isAuthenticated, async (req, res) => {
     try {
       const user = await storage.setUserAsAdmin("ToatSoul");

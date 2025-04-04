@@ -14,6 +14,9 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 import { eq, and } from 'drizzle-orm';
 import pg from 'pg';
 const { Pool } = pg;
+import { generateToken } from './tokenUtils'; // Assuming this function is in tokenUtils.js
+import { hashPassword } from './passwordUtils'; // Assuming this function is in passwordUtils.js
+import nodemailer from 'nodemailer'; // Import nodemailer
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL?.replace('.us-east-2', '-pooler.us-east-2'),
@@ -21,6 +24,16 @@ const pool = new Pool({
 });
 
 const db = drizzle(pool);
+
+// Create a transporter object using your email provider's credentials.  Replace with your actual credentials.
+const transporter = nodemailer.createTransport({
+  service: 'YOUR_EMAIL_SERVICE', // e.g., 'gmail', 'outlook'
+  auth: {
+    user: process.env.EMAIL_USER,
+    pass: process.env.EMAIL_PASSWORD,
+  },
+});
+
 
 export interface IStorage {
   // User operations
@@ -74,6 +87,11 @@ export interface IStorage {
   getRewardItems(): Promise<RewardItem[]>;
   getRewardItem(id: number): Promise<RewardItem | undefined>;
   createUserReward(data: { userId: number; rewardId: number }): Promise<UserReward>;
+
+  // Email Verification and Password Reset
+  verifyEmail(token: string): Promise<boolean>;
+  createPasswordReset(email: string): Promise<boolean>;
+  resetPassword(token: string, newPassword: string): Promise<boolean>;
 }
 
 export class PostgresStorage implements IStorage {
@@ -96,15 +114,26 @@ export class PostgresStorage implements IStorage {
     return results[0];
   }
 
-  async createUser(user: InsertUser): Promise<User> {
-    const hashedPassword = this.hashPassword(user.password);
-    const results = await db.insert(users).values({
-      ...user,
+  async createUser(userData: InsertUser): Promise<User> {
+    const hashedPassword = await hashPassword(userData.password);
+    const verificationToken = generateToken();
+    const user = await db.insert(users).values({
+      ...userData,
       password: hashedPassword,
-      reputation: 0,
-      isAdmin: false
+      isVerified: false,
+      verificationToken
     }).returning();
-    return results[0];
+
+    // Send verification email
+    const verificationLink = `${process.env.APP_URL}/verify-email?token=${verificationToken}`;
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: userData.email,
+      subject: 'Verify your email',
+      html: `Please click <a href="${verificationLink}">here</a> to verify your email.`
+    });
+
+    return user[0];
   }
 
   async updateUserReputation(id: number, amount: number): Promise<User | undefined> {
@@ -286,7 +315,7 @@ export class PostgresStorage implements IStorage {
     const user = results[0];
     if (!user) return undefined;
 
-    const hashedPassword = this.hashPassword(password);
+    const hashedPassword = await hashPassword(password); // Use the async version
     if (user.password !== hashedPassword) return undefined;
 
     return user;
@@ -309,6 +338,56 @@ export class PostgresStorage implements IStorage {
       active: true
     }).returning();
     return results[0];
+  }
+
+  async verifyEmail(token: string): Promise<boolean> {
+    const user = await db.select().from(users).where(eq(users.verificationToken, token)).limit(1);
+
+    if (!user || user.length === 0) return false;
+
+    await db.update(users)
+      .set({ isVerified: true, verificationToken: null })
+      .where(eq(users.id, user[0].id));
+
+    return true;
+  }
+
+  async createPasswordReset(email: string): Promise<boolean> {
+    const user = await this.getUserByEmail(email);
+    if (!user) return false;
+
+    const resetToken = generateToken();
+    await db.update(users)
+      .set({ resetToken, resetTokenExpiry: new Date(Date.now() + 3600000) })
+      .where(eq(users.id, user.id));
+
+    // Send reset email
+    const resetLink = `${process.env.APP_URL}/reset-password?token=${resetToken}`;
+    await transporter.sendMail({
+      from: process.env.EMAIL_USER,
+      to: email,
+      subject: 'Reset your password',
+      html: `Please click <a href="${resetLink}">here</a> to reset your password. This link expires in 1 hour.`
+    });
+
+    return true;
+  }
+
+  async resetPassword(token: string, newPassword: string): Promise<boolean> {
+    const user = await db.select().from(users).where(and(eq(users.resetToken, token), eq(users.resetTokenExpiry, new Date(), '>'))).limit(1);
+
+    if (!user || user.length === 0) return false;
+
+    const hashedPassword = await hashPassword(newPassword);
+    await db.update(users)
+      .set({
+        password: hashedPassword,
+        resetToken: null,
+        resetTokenExpiry: null
+      })
+      .where(eq(users.id, user[0].id));
+
+    return true;
   }
 }
 
