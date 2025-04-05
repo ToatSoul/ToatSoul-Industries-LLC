@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/lib/auth";
@@ -27,7 +26,7 @@ export default function Projects() {
     queryKey: ["/api/projects"],
   });
 
-  const { data: invitations } = useQuery<ProjectInvitation[]>({
+  const { data: invitations, isLoading: invitationsLoading, error: invitationsError } = useQuery<ProjectInvitation[]>({
     queryKey: ["/api/projects/invitations"],
   });
 
@@ -167,14 +166,20 @@ export default function Projects() {
         </TabsContent>
 
         <TabsContent value="invites" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
-          {invitations?.map(invitation => (
-            <InvitationCard
-              key={invitation.id}
-              invitation={invitation}
-              onAccept={() => acceptInvitation.mutate(invitation.id)}
-              onReject={() => rejectInvitation.mutate(invitation.id)}
-            />
-          ))}
+          {invitationsLoading ? (
+            <p>Loading invitations...</p>
+          ) : invitationsError ? (
+            <p>Error loading invitations: {invitationsError.message}</p>
+          ) : (
+            invitations?.map(invitation => (
+              <InvitationCard
+                key={invitation.id}
+                invitation={invitation}
+                onAccept={() => acceptInvitation.mutate(invitation.id)}
+                onReject={() => rejectInvitation.mutate(invitation.id)}
+              />
+            ))
+          )}
         </TabsContent>
       </Tabs>
 
