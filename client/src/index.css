@@ -61,6 +61,52 @@
     --input: 217.2 32.6% 12%;
     --ring: 212.7 26.8% 70%;
   }
+  
+  /* High Contrast Theme - Light Mode */
+  .high-contrast-mode:not(.dark) {
+    --background: 0 0% 100%;
+    --foreground: 0 0% 0%;
+    --card: 0 0% 100%;
+    --card-foreground: 0 0% 0%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 0 0% 0%;
+    --primary: 240 100% 50%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 0 0% 90%;
+    --secondary-foreground: 0 0% 0%;
+    --muted: 0 0% 85%;
+    --muted-foreground: 0 0% 0%;
+    --accent: 240 100% 50%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 0%;
+    --input: 0 0% 0%;
+    --ring: 240 100% 50%;
+  }
+  
+  /* High Contrast Theme - Dark Mode */
+  .high-contrast-mode.dark {
+    --background: 0 0% 0%;
+    --foreground: 0 0% 100%;
+    --card: 0 0% 0%;
+    --card-foreground: 0 0% 100%;
+    --popover: 0 0% 0%;
+    --popover-foreground: 0 0% 100%;
+    --primary: 60 100% 50%;
+    --primary-foreground: 0 0% 0%;
+    --secondary: 0 0% 15%;
+    --secondary-foreground: 0 0% 100%;
+    --muted: 0 0% 15%;
+    --muted-foreground: 0 0% 85%;
+    --accent: 60 100% 50%;
+    --accent-foreground: 0 0% 0%;
+    --destructive: 0 100% 50%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 0 0% 100%;
+    --input: 0 0% 100%;
+    --ring: 60 100% 50%;
+  }
 
   * {
     @apply border-border;
@@ -73,6 +119,25 @@
   ::selection {
     @apply bg-primary/20 text-foreground;
   }
+}
+
+/* Font Size Adjustments */
+.font-size-larger {
+  font-size: 110%;
+  line-height: 1.3;
+}
+
+.font-size-largest {
+  font-size: 125%;
+  line-height: 1.4;
+}
+
+/* Reduced Motion Support */
+.reduced-motion * {
+  animation-duration: 0.001ms !important;
+  animation-iteration-count: 1 !important;
+  transition-duration: 0.001ms !important;
+  scroll-behavior: auto !important;
 }
 
 /* Animation Utilities */
