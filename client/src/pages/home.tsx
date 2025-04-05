@@ -155,7 +155,7 @@ export default function Home() {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <h3 className="text-xl font-semibold text-white mb-2">
                     Reputation-Based Forums
                   </h3>
                   <p className="text-gray-600">
@@ -186,7 +186,7 @@ export default function Home() {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <h3 className="text-xl font-semibold text-white mb-2">
                     File Sharing
                   </h3>
                   <p className="text-gray-600">
@@ -216,7 +216,7 @@ export default function Home() {
                       />
                     </svg>
                   </div>
-                  <h3 className="text-xl font-semibold text-gray-900 mb-2">
+                  <h3 className="text-xl font-semibold text-white mb-2">
                     User Profiles
                   </h3>
                   <p className="text-gray-600">
