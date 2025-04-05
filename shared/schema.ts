@@ -372,5 +372,28 @@ export const projectMembersRelations = relations(projectMembers, ({ one }) => ({
   }),
 }));
 
+// Project invitations schema
+export const projectInvitations = pgTable("project_invitations", {
+  id: serial("id").primaryKey(),
+  projectId: integer("project_id").notNull().references(() => projects.id, { onDelete: "cascade" }),
+  invitedEmail: text("invited_email").notNull(),
+  invitedById: integer("invited_by_id").notNull().references(() => users.id, { onDelete: "cascade" }),
+  status: text("status").notNull().default("pending"), // pending, accepted, rejected
+  createdAt: timestamp("created_at").defaultNow().notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+});
+
+export const projectInvitationsRelations = relations(projectInvitations, ({ one }) => ({
+  project: one(projects, {
+    fields: [projectInvitations.projectId],
+    references: [projects.id],
+  }),
+  invitedBy: one(users, {
+    fields: [projectInvitations.invitedById],
+    references: [users.id],
+  }),
+}));
+
 export type Project = typeof projects.$inferSelect;
 export type ProjectMember = typeof projectMembers.$inferSelect;
+export type ProjectInvitation = typeof projectInvitations.$inferSelect;

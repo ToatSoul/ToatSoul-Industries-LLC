@@ -11,16 +11,24 @@ import { Badge } from "@/components/ui/badge";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { apiRequest } from "@/lib/queryClient";
-import type { Project } from "@shared/schema";
+import { Label } from "@/components/ui/label";
+import type { Project, ProjectInvitation } from "@shared/schema";
 
 export default function Projects() {
   const { user } = useAuth();
   const { toast } = useToast();
   const [isCreateOpen, setIsCreateOpen] = useState(false);
+  const [isInviteOpen, setIsInviteOpen] = useState(false);
+  const [selectedProject, setSelectedProject] = useState<Project | null>(null);
   const [newProject, setNewProject] = useState({ title: "", description: "", maxMembers: 5 });
+  const [inviteEmail, setInviteEmail] = useState("");
 
-  const { data: projects, isLoading } = useQuery<Project[]>({
+  const { data: projects, isLoading, refetch } = useQuery<Project[]>({
     queryKey: ["/api/projects"],
+  });
+
+  const { data: invitations } = useQuery<ProjectInvitation[]>({
+    queryKey: ["/api/projects/invitations"],
   });
 
   const createProject = useMutation({
@@ -29,6 +37,7 @@ export default function Projects() {
     },
     onSuccess: () => {
       setIsCreateOpen(false);
+      refetch();
       toast({
         title: "Project created",
         description: "Your project has been created successfully.",
@@ -36,20 +45,33 @@ export default function Projects() {
     },
   });
 
-  const joinProject = useMutation({
-    mutationFn: async (projectId: number) => {
-      return apiRequest("POST", `/api/projects/${projectId}/join`);
+  const inviteToProject = useMutation({
+    mutationFn: async ({ projectId, email }: { projectId: number; email: string }) => {
+      return apiRequest("POST", `/api/projects/${projectId}/invite`, { email });
     },
     onSuccess: () => {
+      setIsInviteOpen(false);
+      setInviteEmail("");
       toast({
-        title: "Joined project",
-        description: "You have successfully joined the project.",
+        title: "Invitation sent",
+        description: "Project invitation has been sent successfully.",
       });
     },
   });
 
   const handleCreateProject = () => {
     createProject.mutate(newProject);
+  };
+
+  const handleInvite = () => {
+    if (selectedProject && inviteEmail) {
+      inviteToProject.mutate({ projectId: selectedProject.id, email: inviteEmail });
+    }
+  };
+
+  const openInviteDialog = (project: Project) => {
+    setSelectedProject(project);
+    setIsInviteOpen(true);
   };
 
   return (
@@ -64,6 +86,7 @@ export default function Projects() {
           <TabsTrigger value="open">Open Projects</TabsTrigger>
           <TabsTrigger value="my">My Projects</TabsTrigger>
           <TabsTrigger value="joined">Joined Projects</TabsTrigger>
+          <TabsTrigger value="invites">Invitations</TabsTrigger>
         </TabsList>
 
         <TabsContent value="open" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
@@ -71,7 +94,8 @@ export default function Projects() {
             <ProjectCard
               key={project.id}
               project={project}
-              onJoin={() => joinProject.mutate(project.id)}
+              onInvite={() => openInviteDialog(project)}
+              isOwner={project.ownerId === user?.id}
             />
           ))}
         </TabsContent>
@@ -81,6 +105,7 @@ export default function Projects() {
             <ProjectCard
               key={project.id}
               project={project}
+              onInvite={() => openInviteDialog(project)}
               isOwner
             />
           ))}
@@ -95,6 +120,17 @@ export default function Projects() {
             />
           ))}
         </TabsContent>
+
+        <TabsContent value="invites" className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+          {invitations?.map(invitation => (
+            <InvitationCard
+              key={invitation.id}
+              invitation={invitation}
+              onAccept={() => {/* Implement accept */}}
+              onReject={() => {/* Implement reject */}}
+            />
+          ))}
+        </TabsContent>
       </Tabs>
 
       <Dialog open={isCreateOpen} onOpenChange={setIsCreateOpen}>
@@ -103,22 +139,35 @@ export default function Projects() {
             <DialogTitle>Create New Project</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <Input
-              placeholder="Project Title"
-              value={newProject.title}
-              onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
-            />
-            <Textarea
-              placeholder="Project Description"
-              value={newProject.description}
-              onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
-            />
-            <Input
-              type="number"
-              placeholder="Max Members"
-              value={newProject.maxMembers}
-              onChange={(e) => setNewProject({ ...newProject, maxMembers: parseInt(e.target.value) })}
-            />
+            <div>
+              <Label htmlFor="title">Project Title</Label>
+              <Input
+                id="title"
+                placeholder="Project Title"
+                value={newProject.title}
+                onChange={(e) => setNewProject({ ...newProject, title: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="description">Description</Label>
+              <Textarea
+                id="description"
+                placeholder="Project Description"
+                value={newProject.description}
+                onChange={(e) => setNewProject({ ...newProject, description: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="maxMembers">Max Members</Label>
+              <Input
+                id="maxMembers"
+                type="number"
+                min={2}
+                max={10}
+                value={newProject.maxMembers}
+                onChange={(e) => setNewProject({ ...newProject, maxMembers: parseInt(e.target.value) })}
+              />
+            </div>
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsCreateOpen(false)}>Cancel</Button>
@@ -126,13 +175,37 @@ export default function Projects() {
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      <Dialog open={isInviteOpen} onOpenChange={setIsInviteOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Invite to Project</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="email">Email Address</Label>
+              <Input
+                id="email"
+                type="email"
+                placeholder="Enter email address"
+                value={inviteEmail}
+                onChange={(e) => setInviteEmail(e.target.value)}
+              />
+            </div>
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsInviteOpen(false)}>Cancel</Button>
+            <Button onClick={handleInvite}>Send Invitation</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </main>
   );
 }
 
-function ProjectCard({ project, onJoin, isOwner, isMember }: {
+function ProjectCard({ project, onInvite, isOwner, isMember }: {
   project: Project;
-  onJoin?: () => void;
+  onInvite?: () => void;
   isOwner?: boolean;
   isMember?: boolean;
 }) {
@@ -156,15 +229,45 @@ function ProjectCard({ project, onJoin, isOwner, isMember }: {
         </div>
       </CardContent>
       <CardFooter>
-        {!isOwner && !isMember && project.status === "open" && (
-          <Button onClick={onJoin} className="w-full">Join Project</Button>
-        )}
         {isOwner && (
-          <Button variant="outline" className="w-full">Manage Project</Button>
+          <div className="flex gap-2 w-full">
+            <Button onClick={onInvite} className="flex-1">Invite Members</Button>
+            <Button variant="outline" className="flex-1">Manage Project</Button>
+          </div>
+        )}
+        {!isOwner && !isMember && project.status === "open" && (
+          <Button className="w-full">Request to Join</Button>
         )}
         {isMember && (
           <Button variant="outline" className="w-full">View Details</Button>
         )}
+      </CardFooter>
+    </Card>
+  );
+}
+
+function InvitationCard({ invitation, onAccept, onReject }: {
+  invitation: ProjectInvitation;
+  onAccept: () => void;
+  onReject: () => void;
+}) {
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Project Invitation</CardTitle>
+        <CardDescription>You've been invited to join a project</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <p className="text-sm text-muted-foreground">
+          Invited by: {invitation.invitedBy?.username}
+        </p>
+        <p className="text-sm text-muted-foreground">
+          Project: {invitation.project?.title}
+        </p>
+      </CardContent>
+      <CardFooter className="flex gap-2">
+        <Button onClick={onAccept} className="flex-1">Accept</Button>
+        <Button variant="outline" onClick={onReject} className="flex-1">Decline</Button>
       </CardFooter>
     </Card>
   );
