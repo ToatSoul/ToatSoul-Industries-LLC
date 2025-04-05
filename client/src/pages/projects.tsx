@@ -37,10 +37,11 @@ export default function Projects() {
     },
     onSuccess: () => {
       setIsCreateOpen(false);
+      setNewProject({ title: "", description: "", maxMembers: 5 });
       refetch();
       toast({
-        title: "Project created",
-        description: "Your project has been created successfully.",
+        title: "Success",
+        description: "Project created successfully",
       });
     },
   });
@@ -53,26 +54,70 @@ export default function Projects() {
       setIsInviteOpen(false);
       setInviteEmail("");
       toast({
-        title: "Invitation sent",
-        description: "Project invitation has been sent successfully.",
+        title: "Success",
+        description: "Invitation sent successfully",
+      });
+    },
+  });
+
+  const acceptInvitation = useMutation({
+    mutationFn: async (invitationId: number) => {
+      return apiRequest("POST", `/api/projects/invitations/${invitationId}/accept`);
+    },
+    onSuccess: () => {
+      refetch();
+      toast({
+        title: "Success",
+        description: "Joined project successfully",
+      });
+    },
+  });
+
+  const rejectInvitation = useMutation({
+    mutationFn: async (invitationId: number) => {
+      return apiRequest("POST", `/api/projects/invitations/${invitationId}/reject`);
+    },
+    onSuccess: () => {
+      refetch();
+      toast({
+        title: "Success",
+        description: "Invitation rejected",
       });
     },
   });
 
   const handleCreateProject = () => {
+    if (!newProject.title || !newProject.description) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
     createProject.mutate(newProject);
   };
 
   const handleInvite = () => {
-    if (selectedProject && inviteEmail) {
-      inviteToProject.mutate({ projectId: selectedProject.id, email: inviteEmail });
+    if (!selectedProject || !inviteEmail) {
+      toast({
+        title: "Error",
+        description: "Please provide an email address",
+        variant: "destructive",
+      });
+      return;
     }
+    inviteToProject.mutate({ projectId: selectedProject.id, email: inviteEmail });
   };
 
   const openInviteDialog = (project: Project) => {
     setSelectedProject(project);
     setIsInviteOpen(true);
   };
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <main className="container mx-auto py-8 px-4">
@@ -106,7 +151,7 @@ export default function Projects() {
               key={project.id}
               project={project}
               onInvite={() => openInviteDialog(project)}
-              isOwner
+              isOwner={true}
             />
           ))}
         </TabsContent>
@@ -116,7 +161,7 @@ export default function Projects() {
             <ProjectCard
               key={project.id}
               project={project}
-              isMember
+              isMember={true}
             />
           ))}
         </TabsContent>
@@ -126,8 +171,8 @@ export default function Projects() {
             <InvitationCard
               key={invitation.id}
               invitation={invitation}
-              onAccept={() => {/* Implement accept */}}
-              onReject={() => {/* Implement reject */}}
+              onAccept={() => acceptInvitation.mutate(invitation.id)}
+              onReject={() => rejectInvitation.mutate(invitation.id)}
             />
           ))}
         </TabsContent>
