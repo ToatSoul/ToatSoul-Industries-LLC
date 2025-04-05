@@ -91,12 +91,6 @@ export default function Navbar() {
               >
                 Projects
               </Link>
-              <Link
-                href="/projects"
-                className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
-              >
-                Projects
-              </Link>
             </nav>
 
             {/* Desktop Auth Buttons */}
