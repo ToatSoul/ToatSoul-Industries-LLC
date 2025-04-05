@@ -201,7 +201,7 @@ export default function Home() {
       {/* CTA Section */}
       <section className="py-12 md:py-16 bg-primary-50 rounded-lg mt-12">
         <div className="text-center px-4">
-          <h2 className="text-3xl font-bold text-primary-800 mb-4">
+          <h2 className="text-3xl font-bold text-blue-800 mb-4">
             Ready to join the conversation?
           </h2>
           <p className="text-lg text-primary-700 max-w-2xl mx-auto mb-8">
