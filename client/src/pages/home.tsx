@@ -30,10 +30,10 @@ export default function Home() {
         {/* Hero Section */}
         <section className="py-12 md:py-16">
           <SlideUpIn className="text-center" duration={0.7}>
-            <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
+            <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
               Welcome to <span className="text-primary">ToatSoul</span> Industries
             </h1>
-            <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+            <p className="text-xl text-foreground/80 max-w-2xl mx-auto">
               Welcome to ToatSoul Industries — where tech, creativity, and
               community collide. We're a team of homelab nerds, coders, and DIY
               enthusiasts on a mission to make smart homes and self-hosted tech
@@ -126,10 +126,10 @@ export default function Home() {
         {/* Features Section */}
         <section className="py-12 md:py-16">
           <SlideUpIn delay={0.3} className="text-center mb-12">
-            <h2 className="text-3xl font-bold text-blue-900 mb-4">
+            <h2 className="text-3xl font-bold text-primary mb-4">
               Community Features
             </h2>
-            <p className="text-lg text-white-600 max-w-2xl mx-auto">
+            <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
               Everything you need to connect, learn, and share with fellow
               professionals or enthusiasts.
             </p>
