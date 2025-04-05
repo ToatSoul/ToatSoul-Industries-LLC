@@ -91,6 +91,12 @@ export default function Navbar() {
               >
                 Projects
               </Link>
+              <Link
+                href="/projects"
+                className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
+              >
+                Projects
+              </Link>
             </nav>
 
             {/* Desktop Auth Buttons */}
@@ -186,6 +192,13 @@ export default function Navbar() {
                 className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
               >
                 Blog
+              </Link>
+              <Link
+                href="/projects"
+                onClick={closeMenu}
+                className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
+              >
+                Projects
               </Link>
 
               <div className="pt-4 border-t border-border flex flex-col space-y-2">
