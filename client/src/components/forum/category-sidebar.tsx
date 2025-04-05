@@ -152,7 +152,7 @@ export function CategorySidebar({ activeCategoryId }: CategorySidebarProps) {
                 <div key={user.id} className="p-4 flex items-center">
                   <AvatarWithFallback user={user} className="h-10 w-10 mr-3" />
                   <div>
-                    <p className="font-medium text-gray-900">{user.name || user.username}</p>
+                    <p className="font-medium text-white">{user.name || user.username}</p>
                     <div className="flex items-center">
                       <span className="text-xs text-gray-500">Reputation:</span>
                       <span className="ml-1 text-xs font-medium text-green-600">{user.reputation}</span>
