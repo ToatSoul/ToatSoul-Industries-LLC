@@ -26,6 +26,7 @@ import ProfileEdit from "@/pages/profile-edit";
 import Blog from "@/pages/blog";
 import BlogPost from "@/pages/blog-post";
 import NewBlogPost from "@/pages/blog-new";
+import Projects from "@/pages/projects";
 
 // Page transition context
 interface PageTransitionContextType {
@@ -136,6 +137,7 @@ function App() {
                         <Route path="/blog/new" component={NewBlogPost} />
                         <Route path="/blog/:slug" component={BlogPost} />
                         <Route path="/blog" component={Blog} />
+                        <Route path="/projects" component={Projects} />
                         <Route component={NotFound} />
                       </Switch>
                     </PageTransition>
