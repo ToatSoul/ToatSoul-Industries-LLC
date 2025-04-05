@@ -17,7 +17,7 @@ export default function Home() {
       {/* Hero Section */}
       <section className="py-12 md:py-16">
         <div className="text-center">
-          <h1 className="text-4xl md:text-5xl font-bold text-gray-900 mb-4">
+          <h1 className="text-4xl md:text-5xl font-bold text-blue-900 mb-4">
             Welcome to <span className="text-primary">ToatSoul</span> Industries
           </h1>
           <p className="text-xl text-gray-600 max-w-2xl mx-auto">
@@ -106,10 +106,10 @@ export default function Home() {
       {/* Features Section */}
       <section className="py-12 md:py-16">
         <div className="text-center mb-12">
-          <h2 className="text-3xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl font-bold text-blue-900 mb-4">
             Community Features
           </h2>
-          <p className="text-lg text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg text-white-600 max-w-2xl mx-auto">
             Everything you need to connect, learn, and share with fellow
             professionals or enthusiasts.
           </p>
@@ -138,7 +138,8 @@ export default function Home() {
             </h3>
             <p className="text-gray-600">
               Participate in discussions and earn reputation through valuable
-              contributions. Reward interesting content and build your own custom profile, all while earning rewards for your efforts.
+              contributions. Reward interesting content and build your own
+              custom profile, all while earning rewards for your efforts.
             </p>
           </div>
 
@@ -189,7 +190,9 @@ export default function Home() {
               User Profiles
             </h3>
             <p className="text-gray-600">
-              Create your custom profile, showcase your expertise, and track your contributions to the community. Earn rewards for your profile and contributions by spending your points in the rewards store.
+              Create your custom profile, showcase your expertise, and track
+              your contributions to the community. Earn rewards for your profile
+              and contributions by spending your points in the rewards store.
             </p>
           </div>
         </div>
