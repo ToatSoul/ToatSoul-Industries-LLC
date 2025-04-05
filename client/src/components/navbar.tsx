@@ -172,7 +172,7 @@ export default function Navbar() {
                 onClick={closeMenu}
                 className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
               >
-                Rewards Store
+                Reputation Rewards
               </Link>
               <Link
                 href="/blog"

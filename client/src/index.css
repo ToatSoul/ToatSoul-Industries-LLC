@@ -24,6 +24,20 @@
     --input: 214.3 31.8% 91.4%;
     --ring: 222.2 84% 4.9%;
     --radius: 0.5rem;
+    
+    /* Animation Duration Variables */
+    --transition-fast: 150ms;
+    --transition-medium: 300ms;
+    --transition-slow: 500ms;
+    
+    /* Easing Functions */
+    --ease-in-out: cubic-bezier(0.4, 0, 0.2, 1);
+    --ease-out: cubic-bezier(0, 0, 0.2, 1);
+    --ease-in: cubic-bezier(0.4, 0, 1, 1);
+    
+    /* Page Transitions */
+    --page-enter: 120ms;
+    --page-exit: 100ms;
   }
  
   .dark {
@@ -55,4 +69,84 @@
   body {
     @apply font-sans antialiased bg-background text-foreground transition-colors duration-300;
   }
+  
+  ::selection {
+    @apply bg-primary/20 text-foreground;
+  }
+}
+
+/* Animation Utilities */
+@layer utilities {
+  .animate-in {
+    animation-duration: var(--transition-medium);
+    animation-timing-function: var(--ease-out);
+    animation-fill-mode: both;
+  }
+  
+  .fade-in {
+    animation-name: fadeIn;
+  }
+  
+  .slide-in-from-top {
+    animation-name: slideInFromTop;
+  }
+  
+  .slide-in-from-bottom {
+    animation-name: slideInFromBottom;
+  }
+  
+  .slide-in-from-left {
+    animation-name: slideInFromLeft;
+  }
+  
+  .slide-in-from-right {
+    animation-name: slideInFromRight;
+  }
+  
+  .scale-in {
+    animation-name: scaleIn;
+  }
+  
+  .animate-once {
+    animation-iteration-count: 1;
+  }
+  
+  .animate-fast {
+    animation-duration: var(--transition-fast);
+  }
+  
+  .animate-slow {
+    animation-duration: var(--transition-slow);
+  }
+}
+
+/* Custom Keyframes */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInFromTop {
+  from { transform: translateY(-10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInFromBottom {
+  from { transform: translateY(10px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+@keyframes slideInFromLeft {
+  from { transform: translateX(-10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes slideInFromRight {
+  from { transform: translateX(10px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { transform: scale(0.95); opacity: 0; }
+  to { transform: scale(1); opacity: 1; }
 }
