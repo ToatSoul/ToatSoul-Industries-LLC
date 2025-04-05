@@ -1,12 +1,17 @@
+
 import { drizzle } from 'drizzle-orm/node-postgres';
 import pg from 'pg';
 const { Pool } = pg;
 
 // Create PostgreSQL connection pool
 const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  max: 10, // Maximum number of clients in the pool
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : undefined,
+  connectionString: process.env.DATABASE_URL?.replace('.us-east-1', '-pooler.us-east-1'),
+  max: 10,
+  idleTimeoutMillis: 1000,
+  connectionTimeoutMillis: 5000,
+  ssl: process.env.NODE_ENV === 'production' ? 
+    { rejectUnauthorized: true } : 
+    undefined
 });
 
 // For checking connection health
