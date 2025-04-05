@@ -14,6 +14,10 @@ export const users = pgTable("users", {
   reputation: integer("reputation").default(0).notNull(),
   avatarUrl: text("avatar_url"),
   isAdmin: boolean("is_admin").default(false).notNull(),
+  isVerified: boolean("is_verified").default(false),
+  verificationToken: text("verification_token"),
+  resetToken: text("reset_token"),
+  resetTokenExpiry: timestamp("reset_token_expiry"),
 });
 
 export const insertUserSchema = createInsertSchema(users).pick({

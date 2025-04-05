@@ -111,12 +111,19 @@ export class PostgresStorage implements IStorage {
   async createUser(userData: InsertUser): Promise<User> {
     const hashedPassword = await hashPassword(userData.password);
     const verificationToken = generateToken();
-    const user = await db.insert(users).values({
+    
+    // Create insertion data with all required fields
+    const insertData = {
       ...userData,
       password: hashedPassword,
       isVerified: false,
-      verificationToken
-    }).returning();
+      verificationToken,
+      reputation: 0,
+      avatarUrl: null,
+      bio: null
+    };
+    
+    const user = await db.insert(users).values(insertData).returning();
 
     // Send verification email
     const verificationLink = `${process.env.APP_URL}/verify-email?token=${verificationToken}`;
@@ -171,7 +178,7 @@ export class PostgresStorage implements IStorage {
       query = query.offset(options.offset);
     }
 
-    return query;
+    return await query;
   }
 
   async getThread(id: number): Promise<Thread | undefined> {
@@ -203,8 +210,11 @@ export class PostgresStorage implements IStorage {
 
   async searchThreads(query: string): Promise<Thread[]> {
       const lowercaseQuery = query.toLowerCase();
-      return db.select().from(threads).where(
-          (thread) => thread.title.toLowerCase().like(`%${lowercaseQuery}%`) || thread.content.toLowerCase().like(`%${lowercaseQuery}%`)
+      return await db.select().from(threads).where(
+          or(
+              like(sql`LOWER(${threads.title})`, `%${lowercaseQuery}%`),
+              like(sql`LOWER(${threads.content})`, `%${lowercaseQuery}%`)
+          )
       );
   }
 
@@ -295,8 +305,14 @@ export class PostgresStorage implements IStorage {
   }
 
   async getTagsByThreadId(threadId: number): Promise<Tag[]> {
-    const results = await db.select({tag: tags.name, tagId: tags.id}).from(tags).innerJoin(threadTags, eq(threadTags.tagId, tags.id)).where(eq(threadTags.threadId, threadId));
-    return results;
+    const results = await db.select().from(tags)
+      .innerJoin(threadTags, eq(threadTags.tagId, tags.id))
+      .where(eq(threadTags.threadId, threadId));
+    return results.map(row => ({
+      id: row.tags.id,
+      name: row.tags.name,
+      color: row.tags.color
+    }));
   }
 
   async addTagToThread(threadTag: InsertThreadTag): Promise<ThreadTag> {
@@ -368,7 +384,14 @@ export class PostgresStorage implements IStorage {
   }
 
   async resetPassword(token: string, newPassword: string): Promise<boolean> {
-    const user = await db.select().from(users).where(and(eq(users.resetToken, token), eq(users.resetTokenExpiry, new Date(), '>'))).limit(1);
+    // Find user with valid reset token that hasn't expired
+    const now = new Date();
+    const user = await db.select().from(users).where(
+      and(
+        eq(users.resetToken, token),
+        sql`${users.resetTokenExpiry} > ${now}`
+      )
+    ).limit(1);
 
     if (!user || user.length === 0) return false;
 
