@@ -188,7 +188,7 @@ export default function Navbar() {
                 Blog
               </Link>
               <Link
-                href="/projects"
+                to="/projects"
                 onClick={closeMenu}
                 className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
               >
