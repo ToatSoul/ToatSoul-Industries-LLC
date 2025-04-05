@@ -42,7 +42,14 @@ export default function RewardsStore() {
 
   return (
     <main className="container mx-auto py-8">
-      <h1 className="text-4xl font-bold mb-8">Rewards Store</h1>
+      <div className="flex justify-between items-center mb-8">
+        <h1 className="text-4xl font-bold">Rewards Store</h1>
+        {user && (
+          <div className="text-lg">
+            Available Points: <span className="font-bold text-primary">{user.reputation || 0}</span>
+          </div>
+        )}
+      </div>
       {!user && (
         <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4 mb-8">
           <p className="text-yellow-800">Please log in to purchase rewards</p>

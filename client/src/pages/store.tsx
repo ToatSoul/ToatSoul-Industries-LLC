@@ -58,13 +58,8 @@ export default function Store() {
   
   return (
     <div className="container mx-auto py-8 px-4">
-      <div className="flex justify-between items-center mb-8">
+      <div className="mb-8">
         <h1 className="text-3xl font-bold">TSI Store</h1>
-        {user && (
-          <div className="text-lg">
-            Available Points: <span className="font-bold text-primary">{user.reputation || 0}</span>
-          </div>
-        )}
       </div>
       
       <Tabs defaultValue="hardware" className="space-y-4">
