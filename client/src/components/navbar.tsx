@@ -6,6 +6,7 @@ import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Menu, X, User, LogOut } from "lucide-react";
 import { AuthModal } from "@/components/auth/auth-modal";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
+import UnifiedSearch from "@/components/search/unified-search";
 
 export default function Navbar() {
   const { user, logout } = useAuth();
@@ -95,6 +96,7 @@ export default function Navbar() {
 
             {/* Desktop Auth Buttons */}
             <div className="hidden md:flex items-center space-x-2">
+              <UnifiedSearch />
               <ThemeToggle />
 
               {user ? (
@@ -195,7 +197,10 @@ export default function Navbar() {
                 Projects
               </Link>
 
-              <div className="pt-4 border-t border-border flex flex-col space-y-2">
+              <div className="pt-4 border-t border-border flex flex-col space-y-4">
+                <div className="w-full">
+                  <UnifiedSearch />
+                </div>
                 <div className="flex justify-between items-center">
                   <span className="text-sm font-medium">Toggle Theme</span>
                   <ThemeToggle />

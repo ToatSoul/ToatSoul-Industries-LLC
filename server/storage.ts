@@ -50,6 +50,7 @@ export interface IStorage {
   createThread(thread: InsertThread): Promise<Thread>;
   updateThreadViews(id: number): Promise<Thread | undefined>;
   searchThreads(query: string): Promise<Thread[]>;
+  searchAll(query: string): Promise<any[]>;
 
   // Comment operations
   getCommentsByThreadId(threadId: number): Promise<Comment[]>;
@@ -239,13 +240,69 @@ export class PostgresStorage implements IStorage {
   }
 
   async searchThreads(query: string): Promise<Thread[]> {
-      const lowercaseQuery = query.toLowerCase();
-      return await db.select().from(threads).where(
-          or(
-              like(sql`LOWER(${threads.title})`, `%${lowercaseQuery}%`),
-              like(sql`LOWER(${threads.content})`, `%${lowercaseQuery}%`)
+      // Break the query into words for better fuzzy matching
+      const terms = query.toLowerCase().trim().split(/\s+/).filter(term => term.length > 0);
+      
+      if (terms.length === 0) {
+          return [];
+      }
+      
+      // Build a WHERE condition for fuzzy matching with each term
+      let conditions = [];
+      
+      // For a single word, do direct matching with % wildcards
+      if (terms.length === 1) {
+          conditions.push(like(sql`LOWER(${threads.title})`, `%${terms[0]}%`));
+          conditions.push(like(sql`LOWER(${threads.content})`, `%${terms[0]}%`));
+      } 
+      // For multiple words, use more advanced fuzzy matching
+      else {
+          // Title matching - any term can match anywhere in title
+          for (const term of terms) {
+              conditions.push(like(sql`LOWER(${threads.title})`, `%${term}%`));
+          }
+          
+          // Content matching - any term can match anywhere in content
+          for (const term of terms) {
+              conditions.push(like(sql`LOWER(${threads.content})`, `%${term}%`));
+          }
+      }
+      
+      // Execute search query with all the conditions combined with OR
+      const results = await db.select().from(threads).where(or(...conditions))
+          // Order by most recently created
+          .orderBy(sql`${threads.createdAt} DESC`)
+          // Limit to 50 results for performance
+          .limit(50);
+      
+      return results;
+  }
+  
+  // New method to search across multiple content types (threads, projects, blog posts)
+  async searchAll(query: string): Promise<any[]> {
+      if (!query || query.trim().length === 0) {
+          return [];
+      }
+      
+      const lowercaseQuery = query.toLowerCase().trim();
+      const threadResults = await this.searchThreads(query);
+      
+      // Search projects
+      const projectResults = await db.select().from(projects)
+          .where(
+              or(
+                  like(sql`LOWER(${projects.title})`, `%${lowercaseQuery}%`),
+                  like(sql`LOWER(${projects.description})`, `%${lowercaseQuery}%`)
+              )
           )
-      );
+          .orderBy(sql`${projects.createdAt} DESC`)
+          .limit(20);
+      
+      // Return combined results with type indicator
+      return [
+          ...threadResults.map(thread => ({ type: 'thread', data: thread })),
+          ...projectResults.map(project => ({ type: 'project', data: project }))
+      ];
   }
 
   async getCommentsByThreadId(threadId: number): Promise<Comment[]> {

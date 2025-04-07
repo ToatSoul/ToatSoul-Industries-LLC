@@ -1247,6 +1247,74 @@ app.get('/api/users/:id', async (req, res) => {
     }
   });
 
+  // Unified search endpoint that searches across all content types
+  app.get('/api/unified-search', async (req, res) => {
+    try {
+      const query = req.query.q as string;
+
+      if (!query || typeof query !== 'string' || query.trim().length === 0) {
+        return res.status(400).json({ message: 'Search query is required' });
+      }
+
+      const results = await storage.searchAll(query);
+      
+      // Process and augment each result based on its type
+      const processedResults = await Promise.all(results.map(async (result) => {
+        if (result.type === 'thread') {
+          const thread = result.data;
+          const author = await storage.getUser(thread.userId);
+          const votes = await storage.getVotesByThreadId(thread.id);
+          const commentCount = (await storage.getCommentsByThreadId(thread.id)).length;
+          const tags = await storage.getTagsByThreadId(thread.id);
+
+          // Calculate total votes
+          const upvotes = votes.filter(v => v.value > 0).length;
+          const downvotes = votes.filter(v => v.value < 0).length;
+          const voteScore = upvotes - downvotes;
+
+          // Don't include the author's password
+          const { password: _, ...authorWithoutPassword } = author || {};
+
+          return {
+            type: 'thread',
+            data: {
+              ...thread,
+              author: authorWithoutPassword,
+              voteScore,
+              commentCount,
+              tags
+            }
+          };
+        } else if (result.type === 'project') {
+          const project = result.data;
+          const owner = await storage.getUser(project.ownerId);
+          const memberCount = (await storage.getProjectMembers(project.id)).length;
+          
+          // Don't include the owner's password
+          const { password: _, ...ownerWithoutPassword } = owner || {};
+          
+          return {
+            type: 'project',
+            data: {
+              ...project,
+              owner: ownerWithoutPassword,
+              memberCount
+            }
+          };
+        }
+        
+        // Default case - return as is
+        return result;
+      }));
+
+      res.json(processedResults);
+    } catch (error) {
+      console.error('Search error:', error);
+      res.status(500).json({ message: 'Failed to search content' });
+    }
+  });
+
+  // Original thread-only search endpoint (maintained for backward compatibility)
   app.get('/api/search', async (req, res) => {
     try {
       const query = req.query.q as string;
