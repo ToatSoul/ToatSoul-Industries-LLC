@@ -137,11 +137,12 @@ export class PostgresStorage implements IStorage {
     return user[0];
   }
 
-  async updateUserReputation(id: number, amount: number): Promise<User | undefined> {
+  async updateUserReputation(id: number, amount: number, tx?: any): Promise<User | undefined> {
+    const queryBuilder = tx || db;
     const user = await this.getUser(id);
     if (!user) return undefined;
 
-    const results = await db
+    const results = await queryBuilder
       .update(users)
       .set({ reputation: user.reputation + amount })
       .where(eq(users.id, id))
@@ -340,8 +341,9 @@ export class PostgresStorage implements IStorage {
     return results[0];
   }
 
-  async createUserReward({ userId, rewardId }: { userId: number; rewardId: number }): Promise<UserReward> {
-    const results = await db.insert(userRewards).values({
+  async createUserReward({ userId, rewardId }: { userId: number; rewardId: number }, tx?: any): Promise<UserReward> {
+    const queryBuilder = tx || db;
+    const results = await queryBuilder.insert(userRewards).values({
       userId,
       rewardId,
       createdAt: new Date(),
