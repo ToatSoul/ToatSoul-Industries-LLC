@@ -765,7 +765,7 @@ app.get('/api/users/:id', async (req, res) => {
       }
 
       // Start transaction
-      await storage.db.transaction(async (tx) => {
+      await db.transaction(async (tx) => {
         // Deduct reputation
         await storage.updateUserReputation(userId, -reward.cost, tx);
         // Add reward to user
