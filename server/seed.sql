@@ -1,9 +1,11 @@
 INSERT INTO reward_items (name, description, type, cost, icon) VALUES
-('Gold Star Badge', 'Show off your expertise with a shiny gold star!', 'badge', 100, '⭐'),
-('Expert Title', 'Get the "Expert" title displayed on your profile', 'title', 250, '👑'),
-('Rainbow Name', 'Make your username appear in rainbow colors', 'style', 500, '🌈'),
-('Custom Banner', 'Add a custom banner to your profile', 'banner', 750, '🎨'),
-('Verified Badge', 'Get a special verified badge next to your name', 'badge', 1000, '✓');
+('Newcomer', 'Welcome to the community!', 'badge', 100, '👋'),
+('Helper', 'Assisted other community members', 'badge', 250, '🤝'),
+('Builder', 'Created valuable content', 'badge', 500, '🏗️'),
+('Expert', 'Demonstrated deep knowledge', 'badge', 750, '🎓'),
+('Champion', 'Outstanding community contributor', 'badge', 1000, '🏆'),
+('Innovator', 'Brought fresh ideas to life', 'badge', 1500, '💡'),
+('Guardian', 'Helped maintain community standards', 'badge', 2000, '🛡️');
 
 -- Add initial categories
 INSERT INTO categories (name, description, icon) VALUES

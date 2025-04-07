@@ -139,6 +139,25 @@ export default function Profile() {
               <p className="text-gray-600 whitespace-pre-wrap">{user.bio}</p>
             </div>
           )}
+          
+          <div className="mt-6">
+            <h3 className="text-lg font-semibold mb-2">Badges</h3>
+            <div className="flex flex-wrap gap-2">
+              {profile.rewards?.map((reward) => (
+                <Badge
+                  key={reward.id}
+                  variant="secondary"
+                  className="flex items-center gap-1 px-3 py-1"
+                >
+                  <span>{reward.icon}</span>
+                  <span>{reward.name}</span>
+                </Badge>
+              ))}
+              {(!profile.rewards || profile.rewards.length === 0) && (
+                <p className="text-gray-500 text-sm">No badges earned yet</p>
+              )}
+            </div>
+          </div>
         </CardContent>
       </Card>
       
