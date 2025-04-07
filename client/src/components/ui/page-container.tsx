@@ -1,6 +1,7 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { cn } from "@/lib/utils";
 import { motion } from "framer-motion";
+import { LoadingSpinner } from "./loading-spinner";
 
 export interface PageContainerProps {
   children: React.ReactNode;
@@ -48,6 +49,22 @@ export function PageContainer({
 
   // Select the appropriate variant
   const selectedVariant = animate ? variants[animationType] || variants.fade : variants.none;
+
+  // Handle loading state
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const timer = setTimeout(() => setIsLoading(false), 100);
+    return () => clearTimeout(timer);
+  }, []);
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <LoadingSpinner size="lg" variant="dots" />
+      </div>
+    );
+  }
 
   return (
     <div className={cn("w-full min-h-[calc(100vh-8rem)]", containerClassName)}>
