@@ -20,7 +20,8 @@ export default function Home() {
         <section className="py-12 md:py-16">
           <div className="text-center">
             <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4">
-              Welcome to <span className="text-primary">ToatSoul</span> Industries
+              Welcome to <span className="text-primary">ToatSoul</span>{" "}
+              Industries
             </h1>
             <p className="text-xl text-foreground/80 max-w-2xl mx-auto">
               Welcome to ToatSoul Industries — where tech, creativity, and
@@ -35,11 +36,19 @@ export default function Home() {
                 </Button>
               </Link>
               {!user ? (
-                <Button variant="outline" className="text-base px-6 py-3 h-auto" asChild>
+                <Button
+                  variant="outline"
+                  className="text-base px-6 py-3 h-auto"
+                  asChild
+                >
                   <Link to="/forums">Join the Community</Link>
                 </Button>
               ) : (
-                <Button variant="outline" className="text-base px-6 py-3 h-auto" asChild>
+                <Button
+                  variant="outline"
+                  className="text-base px-6 py-3 h-auto"
+                  asChild
+                >
                   <Link to="/new-thread">Create a Thread</Link>
                 </Button>
               )}
@@ -94,7 +103,7 @@ export default function Home() {
             </h2>
             <p className="text-lg text-foreground/80 max-w-2xl mx-auto">
               Everything you need to connect, learn, and share with fellow
-              professionals or enthusiasts.
+              users.
             </p>
           </div>
 
@@ -121,9 +130,9 @@ export default function Home() {
                   Reputation-Based Forums
                 </h3>
                 <p className="text-foreground/70">
-                  Participate in discussions and earn reputation through valuable
-                  contributions. Reward interesting content and build your own
-                  custom profile.
+                  Participate in discussions and earn reputation through
+                  valuable contributions. Reward interesting content and build
+                  your own custom profile.
                 </p>
               </div>
             </Card>
@@ -150,8 +159,9 @@ export default function Home() {
                   File Sharing
                 </h3>
                 <p className="text-foreground/70">
-                  Share resources, code samples, and documents with the community.
-                  Download and view files directly within forum threads.
+                  Share resources, code samples, and documents with the
+                  community. Download and view files directly within forum
+                  threads.
                 </p>
               </div>
             </Card>
@@ -194,7 +204,8 @@ export default function Home() {
                 Ready to join the conversation?
               </h2>
               <p className="text-lg text-foreground/80 max-w-2xl mx-auto mb-8">
-                Connect with professionals, share knowledge, and grow your network today.
+                Connect with professionals, share knowledge, and grow your
+                network today.
               </p>
               <Link to="/forums">
                 <Button className="text-base px-6 py-3 h-auto">
