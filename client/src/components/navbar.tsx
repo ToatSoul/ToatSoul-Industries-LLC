@@ -56,7 +56,7 @@ export default function Navbar() {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-4">
               <Link
-                href="/"
+                href="/main"
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
               >
                 Home
