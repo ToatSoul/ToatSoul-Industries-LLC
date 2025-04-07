@@ -44,7 +44,7 @@ export default function Home() {
               control of your digital world, one project at a time.
             </p>
             <div className="mt-8 flex flex-col sm:flex-row justify-center gap-4">
-              <Link href="/forums">
+              <Link to="/forums">
                 <AnimatedButton 
                   className="text-base px-6 py-3 h-auto"
                   animationType="bounce"
@@ -59,7 +59,7 @@ export default function Home() {
                   asChild
                   animationType="scale"
                 >
-                  <Link href="/forums">Join the Community</Link>
+                  <Link to="/forums">Join the Community</Link>
                 </AnimatedButton>
               ) : (
                 <AnimatedButton
@@ -68,7 +68,7 @@ export default function Home() {
                   asChild
                   animationType="scale"
                 >
-                  <Link href="/new-thread">Create a Thread</Link>
+                  <Link to="/new-thread">Create a Thread</Link>
                 </AnimatedButton>
               )}
             </div>
@@ -83,7 +83,7 @@ export default function Home() {
                 <h2 className="text-2xl font-bold text-gray-900">
                   Latest Discussions
                 </h2>
-                <Link href="/forums">
+                <Link to="/forums">
                   <AnimatedButton variant="link" className="font-medium" animationType="scale">
                     View All
                   </AnimatedButton>
@@ -114,7 +114,7 @@ export default function Home() {
                   <p className="text-gray-500">
                     No discussions yet. Be the first to create a thread!
                   </p>
-                  <Link href="/new-thread">
+                  <Link to="/new-thread">
                     <AnimatedButton className="mt-4" animationType="bounce">Create Thread</AnimatedButton>
                   </Link>
                 </FadeIn>
@@ -241,7 +241,7 @@ export default function Home() {
                 Connect with professionals, share knowledge, and grow your network
                 today.
               </p>
-              <Link href="/forums">
+              <Link to="/forums">
                 <AnimatedButton 
                   className="text-base px-6 py-3 h-auto"
                   animationType="pulse"
