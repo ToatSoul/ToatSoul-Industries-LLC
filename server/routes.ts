@@ -886,7 +886,7 @@ app.get('/api/users/:id', async (req, res) => {
     }
   });
 
-  app.delete('/api/blog/authors/:userId, isAuthenticated, async (req, res) => {
+  app.delete('/api/blog/authors/:userId', isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
       if (!user.isAdmin) {
