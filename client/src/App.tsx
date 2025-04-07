@@ -139,7 +139,7 @@ function App() {
                         <Route path="/blog" component={Blog} />
                         <Route path="/projects" component={Projects} />
                         <Route path="/" component={Home} />
-                        <Route component={NotFound} />
+                        <Route path="*" component={NotFound} />
                       </Switch>
                     </PageTransition>
                   </AnimatePresence>
