@@ -8,7 +8,9 @@ import {
   tags, type Tag, type InsertTag,
   threadTags, type ThreadTag, type InsertThreadTag,
   rewardItems, userRewards, type RewardItem, type UserReward,
-  blogPosts, blogAuthors, type BlogPost, type BlogAuthor
+  blogPosts, blogAuthors, type BlogPost, type BlogAuthor,
+  projects, projectMembers, projectInvitations,
+  type Project, type ProjectMember, type ProjectInvitation
 } from "@shared/schema";
 import crypto from "crypto";
 import { eq, and, like, sql, or } from 'drizzle-orm';
@@ -86,6 +88,25 @@ export interface IStorage {
   verifyEmail(token: string): Promise<boolean>;
   createPasswordReset(email: string): Promise<boolean>;
   resetPassword(token: string, newPassword: string): Promise<boolean>;
+
+  // Project operations
+  getProjects(): Promise<Project[]>;
+  getProject(id: number): Promise<Project | undefined>;
+  createProject(project: any): Promise<Project>;
+  updateProject(id: number, data: any): Promise<Project>;
+  deleteProject(id: number): Promise<void>;
+  
+  // Project Member operations
+  getProjectMembers(projectId: number): Promise<ProjectMember[]>;
+  getProjectMember(projectId: number, userId: number): Promise<ProjectMember | undefined>;
+  addProjectMember(member: any): Promise<ProjectMember>;
+  removeProjectMember(projectId: number, userId: number): Promise<void>;
+  
+  // Project Invitation operations
+  getProjectInvitation(id: number): Promise<ProjectInvitation | undefined>;
+  getProjectInvitationsByEmail(email: string): Promise<ProjectInvitation[]>;
+  createProjectInvitation(invitation: any): Promise<ProjectInvitation>;
+  updateProjectInvitation(id: number, data: any): Promise<ProjectInvitation>;
 }
 
 export class PostgresStorage implements IStorage {
@@ -423,6 +444,112 @@ export class PostgresStorage implements IStorage {
       .where(eq(users.id, user[0].id));
 
     return true;
+  }
+
+  // Project operations
+  async getProjects(): Promise<Project[]> {
+    return db.select().from(projects);
+  }
+
+  async getProject(id: number): Promise<Project | undefined> {
+    const results = await db.select().from(projects).where(eq(projects.id, id));
+    return results[0];
+  }
+
+  async createProject(project: any): Promise<Project> {
+    const now = new Date();
+    const results = await db.insert(projects).values({
+      ...project,
+      createdAt: now,
+      updatedAt: now
+    }).returning();
+    return results[0];
+  }
+
+  async updateProject(id: number, data: any): Promise<Project> {
+    const results = await db.update(projects)
+      .set({
+        ...data,
+        updatedAt: new Date()
+      })
+      .where(eq(projects.id, id))
+      .returning();
+    return results[0];
+  }
+
+  async deleteProject(id: number): Promise<void> {
+    // Delete all members and invitations first
+    await db.delete(projectInvitations).where(eq(projectInvitations.projectId, id));
+    await db.delete(projectMembers).where(eq(projectMembers.projectId, id));
+    
+    // Then delete the project
+    await db.delete(projects).where(eq(projects.id, id));
+  }
+
+  // Project Member operations
+  async getProjectMembers(projectId: number): Promise<ProjectMember[]> {
+    return db.select().from(projectMembers).where(eq(projectMembers.projectId, projectId));
+  }
+
+  async getProjectMember(projectId: number, userId: number): Promise<ProjectMember | undefined> {
+    const results = await db.select().from(projectMembers).where(
+      and(
+        eq(projectMembers.projectId, projectId),
+        eq(projectMembers.userId, userId)
+      )
+    );
+    return results[0];
+  }
+
+  async addProjectMember(member: any): Promise<ProjectMember> {
+    const results = await db.insert(projectMembers).values({
+      ...member,
+      joinedAt: new Date()
+    }).returning();
+    return results[0];
+  }
+
+  async removeProjectMember(projectId: number, userId: number): Promise<void> {
+    await db.delete(projectMembers).where(
+      and(
+        eq(projectMembers.projectId, projectId),
+        eq(projectMembers.userId, userId)
+      )
+    );
+  }
+
+  // Project Invitation operations
+  async getProjectInvitation(id: number): Promise<ProjectInvitation | undefined> {
+    const results = await db.select().from(projectInvitations).where(eq(projectInvitations.id, id));
+    return results[0];
+  }
+
+  async getProjectInvitationsByEmail(email: string): Promise<ProjectInvitation[]> {
+    return db.select().from(projectInvitations).where(
+      and(
+        eq(projectInvitations.invitedEmail, email),
+        eq(projectInvitations.status, 'pending')
+      )
+    );
+  }
+
+  async createProjectInvitation(invitation: any): Promise<ProjectInvitation> {
+    const results = await db.insert(projectInvitations).values({
+      ...invitation,
+      createdAt: new Date()
+    }).returning();
+    return results[0];
+  }
+
+  async updateProjectInvitation(id: number, data: any): Promise<ProjectInvitation> {
+    const results = await db.update(projectInvitations)
+      .set({
+        ...data,
+        updatedAt: new Date()
+      })
+      .where(eq(projectInvitations.id, id))
+      .returning();
+    return results[0];
   }
 }
 

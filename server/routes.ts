@@ -918,6 +918,335 @@ app.get('/api/users/:id', async (req, res) => {
     }
   });
 
+  // Project Routes
+  app.get('/api/projects', async (req, res) => {
+    try {
+      const projects = await storage.getProjects();
+      
+      // Add owner and member information
+      const projectsWithData = await Promise.all(projects.map(async (project) => {
+        const owner = await storage.getUser(project.ownerId);
+        const members = await storage.getProjectMembers(project.id);
+        
+        // Don't include the owner's password
+        const { password: _, ...ownerWithoutPassword } = owner || {};
+        
+        return {
+          ...project,
+          owner: ownerWithoutPassword,
+          members
+        };
+      }));
+      
+      res.json(projectsWithData);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch projects' });
+    }
+  });
+
+  app.get('/api/projects/:id', async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id, 10);
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: 'Project not found' });
+      }
+      
+      // Get owner and members
+      const owner = await storage.getUser(project.ownerId);
+      const members = await storage.getProjectMembers(project.id);
+      
+      // Don't include the owner's password
+      const { password: _, ...ownerWithoutPassword } = owner || {};
+      
+      res.json({
+        ...project,
+        owner: ownerWithoutPassword,
+        members
+      });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch project' });
+    }
+  });
+
+  app.post('/api/projects', isAuthenticated, async (req, res) => {
+    try {
+      const projectData = {
+        ...req.body,
+        ownerId: (req.user as any).id
+      };
+      
+      const project = await storage.createProject(projectData);
+      
+      // Add owner as a member with role "owner"
+      await storage.addProjectMember({
+        projectId: project.id,
+        userId: (req.user as any).id,
+        role: 'owner'
+      });
+      
+      res.status(201).json(project);
+    } catch (error) {
+      res.status(500).json({ message: error.message || 'Failed to create project' });
+    }
+  });
+
+  app.put('/api/projects/:id', isAuthenticated, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id, 10);
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: 'Project not found' });
+      }
+      
+      // Check if user is the owner
+      if (project.ownerId !== (req.user as any).id) {
+        return res.status(403).json({ message: 'Only the project owner can update the project' });
+      }
+      
+      const updatedProject = await storage.updateProject(projectId, req.body);
+      
+      res.json(updatedProject);
+    } catch (error) {
+      res.status(500).json({ message: error.message || 'Failed to update project' });
+    }
+  });
+
+  app.delete('/api/projects/:id', isAuthenticated, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id, 10);
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: 'Project not found' });
+      }
+      
+      // Check if user is the owner
+      if (project.ownerId !== (req.user as any).id) {
+        return res.status(403).json({ message: 'Only the project owner can delete the project' });
+      }
+      
+      await storage.deleteProject(projectId);
+      
+      res.json({ message: 'Project deleted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: error.message || 'Failed to delete project' });
+    }
+  });
+
+  // Project members routes
+  app.get('/api/projects/:id/members', async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id, 10);
+      const members = await storage.getProjectMembers(projectId);
+      
+      // Get user information for each member
+      const membersWithData = await Promise.all(members.map(async (member) => {
+        const user = await storage.getUser(member.userId);
+        
+        // Don't include the user's password
+        const { password: _, ...userWithoutPassword } = user || {};
+        
+        return {
+          ...member,
+          user: userWithoutPassword
+        };
+      }));
+      
+      res.json(membersWithData);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch project members' });
+    }
+  });
+
+  app.post('/api/projects/:id/members', isAuthenticated, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id, 10);
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: 'Project not found' });
+      }
+      
+      // Check if user is the owner or has admin role
+      const userMember = await storage.getProjectMember(projectId, (req.user as any).id);
+      if (!userMember || (userMember.role !== 'owner' && userMember.role !== 'admin')) {
+        return res.status(403).json({ message: 'Only the project owner or admins can add members' });
+      }
+      
+      // Check if max members reached
+      const currentMembers = await storage.getProjectMembers(projectId);
+      if (currentMembers.length >= project.maxMembers) {
+        return res.status(400).json({ message: 'Maximum number of members reached' });
+      }
+      
+      const memberData = {
+        projectId,
+        userId: req.body.userId,
+        role: req.body.role || 'member'
+      };
+      
+      const member = await storage.addProjectMember(memberData);
+      
+      res.status(201).json(member);
+    } catch (error) {
+      res.status(500).json({ message: error.message || 'Failed to add project member' });
+    }
+  });
+
+  // Project invitations
+  app.get('/api/invitations', isAuthenticated, async (req, res) => {
+    try {
+      // Get invitations for the user's email
+      const user = await storage.getUser((req.user as any).id);
+      const invitations = await storage.getProjectInvitationsByEmail(user.email);
+      
+      // Add project and invited by information
+      const invitationsWithData = await Promise.all(invitations.map(async (invitation) => {
+        const project = await storage.getProject(invitation.projectId);
+        const invitedBy = await storage.getUser(invitation.invitedById);
+        
+        // Don't include passwords
+        const { password: _, ...invitedByWithoutPassword } = invitedBy || {};
+        
+        return {
+          ...invitation,
+          project,
+          invitedBy: invitedByWithoutPassword
+        };
+      }));
+      
+      res.json(invitationsWithData);
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to fetch project invitations' });
+    }
+  });
+
+  app.post('/api/projects/:id/invitations', isAuthenticated, async (req, res) => {
+    try {
+      const projectId = parseInt(req.params.id, 10);
+      const project = await storage.getProject(projectId);
+      
+      if (!project) {
+        return res.status(404).json({ message: 'Project not found' });
+      }
+      
+      // Check if user is the owner or has admin role
+      const userMember = await storage.getProjectMember(projectId, (req.user as any).id);
+      if (!userMember || (userMember.role !== 'owner' && userMember.role !== 'admin')) {
+        return res.status(403).json({ message: 'Only the project owner or admins can send invitations' });
+      }
+      
+      // Check if max members reached
+      const currentMembers = await storage.getProjectMembers(projectId);
+      if (currentMembers.length >= project.maxMembers) {
+        return res.status(400).json({ message: 'Maximum number of members reached' });
+      }
+      
+      // Check if invited email already a member
+      const existingMember = await storage.getUserByEmail(req.body.invitedEmail);
+      if (existingMember) {
+        const isMember = await storage.getProjectMember(projectId, existingMember.id);
+        if (isMember) {
+          return res.status(400).json({ message: 'User is already a member of this project' });
+        }
+      }
+      
+      // Create expiration date (7 days from now)
+      const expiresAt = new Date();
+      expiresAt.setDate(expiresAt.getDate() + 7);
+      
+      const invitationData = {
+        projectId,
+        invitedEmail: req.body.invitedEmail,
+        invitedById: (req.user as any).id,
+        status: 'pending',
+        expiresAt: expiresAt.toISOString()
+      };
+      
+      const invitation = await storage.createProjectInvitation(invitationData);
+      
+      res.status(201).json(invitation);
+    } catch (error) {
+      res.status(500).json({ message: error.message || 'Failed to create project invitation' });
+    }
+  });
+
+  app.put('/api/invitations/:id/accept', isAuthenticated, async (req, res) => {
+    try {
+      const invitationId = parseInt(req.params.id, 10);
+      const invitation = await storage.getProjectInvitation(invitationId);
+      
+      if (!invitation) {
+        return res.status(404).json({ message: 'Invitation not found' });
+      }
+      
+      // Check if the invitation is for this user
+      const user = await storage.getUser((req.user as any).id);
+      if (invitation.invitedEmail !== user.email) {
+        return res.status(403).json({ message: 'This invitation is not for you' });
+      }
+      
+      // Check if invitation is expired
+      const now = new Date();
+      const expiresAt = new Date(invitation.expiresAt);
+      if (now > expiresAt) {
+        return res.status(400).json({ message: 'Invitation has expired' });
+      }
+      
+      // Check if invitation is pending
+      if (invitation.status !== 'pending') {
+        return res.status(400).json({ message: 'Invitation has already been ' + invitation.status });
+      }
+      
+      // Accept invitation and add user as member
+      await storage.updateProjectInvitation(invitationId, { status: 'accepted' });
+      
+      const memberData = {
+        projectId: invitation.projectId,
+        userId: (req.user as any).id,
+        role: 'member'
+      };
+      
+      const member = await storage.addProjectMember(memberData);
+      
+      res.json({ message: 'Invitation accepted', member });
+    } catch (error) {
+      res.status(500).json({ message: error.message || 'Failed to accept invitation' });
+    }
+  });
+
+  app.put('/api/invitations/:id/reject', isAuthenticated, async (req, res) => {
+    try {
+      const invitationId = parseInt(req.params.id, 10);
+      const invitation = await storage.getProjectInvitation(invitationId);
+      
+      if (!invitation) {
+        return res.status(404).json({ message: 'Invitation not found' });
+      }
+      
+      // Check if the invitation is for this user
+      const user = await storage.getUser((req.user as any).id);
+      if (invitation.invitedEmail !== user.email) {
+        return res.status(403).json({ message: 'This invitation is not for you' });
+      }
+      
+      // Check if invitation is pending
+      if (invitation.status !== 'pending') {
+        return res.status(400).json({ message: 'Invitation has already been ' + invitation.status });
+      }
+      
+      // Reject invitation
+      await storage.updateProjectInvitation(invitationId, { status: 'rejected' });
+      
+      res.json({ message: 'Invitation rejected' });
+    } catch (error) {
+      res.status(500).json({ message: error.message || 'Failed to reject invitation' });
+    }
+  });
+
   app.get('/api/search', async (req, res) => {
     try {
       const query = req.query.q as string;
