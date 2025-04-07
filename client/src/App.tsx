@@ -41,23 +41,7 @@ const PageTransitionContext = createContext<PageTransitionContextType>({
 
 export const usePageTransition = () => useContext(PageTransitionContext);
 
-// Loading spinner component with animation
-function Loading() {
-  return (
-    <div className="flex items-center justify-center h-screen">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.8 }}
-        animate={{ opacity: 1, scale: 1 }}
-        transition={{ duration: 0.3 }}
-        className="flex flex-col items-center"
-      >
-        <div className="flex flex-col items-center gap-4">
-          <LoadingSpinner size="lg" variant="spinner" text="Loading..." />
-        </div>
-      </motion.div>
-    </div>
-  );
-}
+
 
 // Page transition wrapper
 const PageTransition = ({ children }: { children: React.ReactNode }) => {
@@ -121,8 +105,7 @@ function App() {
             <div className="min-h-screen flex flex-col bg-background text-foreground">
               <Navbar />
               <div className="flex-grow">
-                <Suspense fallback={<Loading />}>
-                  <AnimatePresence mode="wait">
+                <AnimatePresence mode="wait">
                     <PageTransition key={location}>
                       <Switch>
                         <Route path="/" component={Home} />
@@ -143,7 +126,6 @@ function App() {
                       </Switch>
                     </PageTransition>
                   </AnimatePresence>
-                </Suspense>
               </div>
               <Footer />
               <AccessibilityMenu />
