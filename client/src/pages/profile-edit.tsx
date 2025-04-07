@@ -32,13 +32,16 @@ export default function ProfileEdit() {
 
     try {
       const formData = new FormData();
-      if (username !== user.username) formData.append("username", username);
-      if (email !== user.email) formData.append("email", email);
+      // Always include current values to ensure complete update
+      formData.append("username", username);
+      formData.append("email", email);
       if (currentPassword && newPassword) {
         formData.append("currentPassword", currentPassword);
         formData.append("newPassword", newPassword);
       }
-      if (avatar) formData.append("avatar", avatar);
+      if (avatar) {
+        formData.append("avatar", avatar);
+      }
 
       const response = await fetch(`/api/users/${user.id}`, {
         method: "PUT",

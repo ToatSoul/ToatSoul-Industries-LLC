@@ -886,7 +886,7 @@ app.get('/api/users/:id', async (req, res) => {
     }
   });
 
-  app.delete('/api/blog/authors/:userId', isAuthenticated, async (req, res) => {
+  app.delete('/api/blog/authors/:userId, isAuthenticated, async (req, res) => {
     try {
       const user = req.user as any;
       if (!user.isAdmin) {
@@ -940,6 +940,11 @@ app.get('/api/users/:id', async (req, res) => {
       res.status(500).json({ message: 'Failed to search threads' });
     }
   });
+
+  //Add middleware to serve static files
+  app.use(express.json());
+  app.use(express.urlencoded({ extended: false }));
+  app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
 
   // Create HTTP server
   const httpServer = createServer(app);
