@@ -21,7 +21,8 @@ export function PageContainer({
   animationType = "fade",
   duration = 0.3,
 }: PageContainerProps) {
-
+  
+  // Define animation variants
   const variants = {
     fade: {
       initial: { opacity: 0 },
@@ -45,6 +46,7 @@ export function PageContainer({
     }
   };
 
+  // Select the appropriate variant
   const selectedVariant = animate ? variants[animationType] || variants.fade : variants.none;
 
   return (
@@ -54,7 +56,7 @@ export function PageContainer({
         animate={selectedVariant.animate}
         exit={selectedVariant.exit}
         transition={{ duration }}
-        className={cn("w-full", contentClassName, className)}
+        className={cn("w-full h-full", contentClassName, className)}
       >
         {children}
       </motion.div>

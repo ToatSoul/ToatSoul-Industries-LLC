@@ -48,7 +48,7 @@ export default function Navbar() {
           <div className="flex justify-between items-center h-16">
             {/* Logo */}
             <div className="flex-shrink-0">
-              <Link to="/" className="text-xl font-bold text-primary">
+              <Link href="/" className="text-xl font-bold text-primary">
                 ToatSoul Industries
               </Link>
             </div>
@@ -56,7 +56,7 @@ export default function Navbar() {
             {/* Desktop Navigation */}
             <nav className="hidden md:flex space-x-4">
               <Link
-                href="/main"
+                href="/"
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
               >
                 Home
