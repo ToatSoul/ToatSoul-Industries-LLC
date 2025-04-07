@@ -121,8 +121,8 @@ function App() {
                         <Route path="/blog/:slug" component={BlogPost} />
                         <Route path="/blog" component={Blog} />
                         <Route path="/projects" component={Projects} />
-                        <Route path="/" component={Home} />
                         <Route path="*" component={NotFound} />
+                        <Route path="/" component={Home} />
                       </Switch>
                     </PageTransition>
                   </AnimatePresence>
