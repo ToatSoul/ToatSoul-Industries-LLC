@@ -188,12 +188,20 @@ export class PostgresStorage implements IStorage {
   }
 
   async createThread(thread: InsertThread): Promise<Thread> {
-    const results = await db.insert(threads).values({
-      ...thread,
-      views: 0,
-      createdAt: new Date(),
-      updatedAt: new Date()
-    }).returning();
+    const results = await db.transaction(async (tx) => {
+      // Create thread
+      const newThread = await tx.insert(threads).values({
+        ...thread,
+        views: 0,
+        createdAt: new Date(),
+        updatedAt: new Date()
+      }).returning();
+      
+      // Award points for creating thread
+      await this.updateUserReputation(thread.userId, 50, tx);
+      
+      return newThread;
+    });
     return results[0];
   }
 
@@ -224,10 +232,18 @@ export class PostgresStorage implements IStorage {
   }
 
   async createComment(comment: InsertComment): Promise<Comment> {
-    const results = await db.insert(comments).values({
-      ...comment,
-      createdAt: new Date()
-    }).returning();
+    const results = await db.transaction(async (tx) => {
+      // Create comment
+      const newComment = await tx.insert(comments).values({
+        ...comment,
+        createdAt: new Date()
+      }).returning();
+      
+      // Award points for creating comment
+      await this.updateUserReputation(comment.userId, 25, tx);
+      
+      return newComment;
+    });
     return results[0];
   }
 
