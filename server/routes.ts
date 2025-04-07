@@ -273,6 +273,23 @@ app.use(session({
     }
   });
 
+  app.post("/api/rewards/grant-all", isAuthenticated, async (req, res) => {
+    try {
+      const rewards = await storage.getRewardItems();
+      await db.transaction(async (tx) => {
+        for (const reward of rewards) {
+          await storage.createUserReward({ 
+            userId: 1, // ToatSoul's ID
+            rewardId: reward.id 
+          }, tx);
+        }
+      });
+      res.json({ message: 'All badges granted successfully' });
+    } catch (error) {
+      res.status(500).json({ message: 'Failed to grant badges' });
+    }
+  });
+
   // Categories routes
   app.get('/api/categories', async (req, res) => {
     try {
