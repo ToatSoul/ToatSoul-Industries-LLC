@@ -77,7 +77,7 @@ export default function Navbar() {
                 to="/rewards"
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
               >
-                Rewards Store
+                Rewards Corner
               </Link>
               <Link
                 to="/blog"
