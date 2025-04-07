@@ -4,7 +4,7 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 import { Menu, X, User, LogOut } from "lucide-react";
-import AuthModal from "@/components/auth-modal";
+import { AuthModal } from "@/components/auth/auth-modal";
 import { ThemeToggle } from "@/components/ui/theme-toggle";
 
 export default function Navbar() {
@@ -62,31 +62,31 @@ export default function Navbar() {
                 Home
               </Link>
               <Link
-                href="/forums"
+                to="/forums"
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
               >
                 Forums
               </Link>
               <Link
-                href="/store"
+                to="/store"
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
               >
                 Store
               </Link>
               <Link
-                href="/rewards"
+                to="/rewards"
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
               >
                 Rewards Store
               </Link>
               <Link
-                href="/blog"
+                to="/blog"
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
               >
                 Blog
               </Link>
               <Link
-                href="/projects"
+                to="/projects"
                 className="px-3 py-2 rounded-md text-sm font-medium hover:bg-secondary/20"
               >
                 Projects
@@ -99,7 +99,7 @@ export default function Navbar() {
 
               {user ? (
                 <div className="flex items-center space-x-2 ml-2">
-                  <Link href={`/profile/${user.id}`}>
+                  <Link to={`/profile/${user.id}`}>
                     <Button
                       variant="ghost"
                       className="flex items-center space-x-2"
@@ -153,35 +153,35 @@ export default function Navbar() {
           <div className="md:hidden border-t border-border">
             <div className="container mx-auto px-4 pt-2 pb-3 space-y-1">
               <Link
-                href="/"
+                to="/"
                 onClick={closeMenu}
                 className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
               >
                 Home
               </Link>
               <Link
-                href="/forums"
+                to="/forums"
                 onClick={closeMenu}
                 className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
               >
                 Forums
               </Link>
               <Link
-                href="/store"
+                to="/store"
                 onClick={closeMenu}
                 className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
               >
                 Store
               </Link>
               <Link
-                href="/rewards"
+                to="/rewards"
                 onClick={closeMenu}
                 className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
               >
                 Reputation Rewards
               </Link>
               <Link
-                href="/blog"
+                to="/blog"
                 onClick={closeMenu}
                 className="block px-3 py-2 rounded-md text-base font-medium hover:bg-secondary/20"
               >
@@ -203,11 +203,10 @@ export default function Navbar() {
 
                 {user ? (
                   <>
-                    <Link href={`/profile/${user.id}`}>
+                    <Link to={`/profile/${user.id}`} onClick={closeMenu}>
                       <Button
                         variant="ghost"
                         className="w-full justify-start"
-                        onClick={closeMenu}
                       >
                         <User className="mr-2 h-4 w-4" />
                         Profile

@@ -5,9 +5,8 @@ import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "./lib/auth";
 import { AccessibilityProvider } from "./lib/accessibility-context";
 import { AccessibilityMenu } from "./components/accessibility/accessibility-menu";
-import { lazy, Suspense, useEffect, useState, createContext, useContext } from "react";
+import { useEffect, useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
-import { LoadingSpinner } from "@/components/ui/loading-spinner";
 
 // Components
 import Navbar from "./components/navbar";
@@ -39,9 +38,8 @@ const PageTransitionContext = createContext<PageTransitionContextType>({
   currentPath: '/'
 });
 
-export const usePageTransition = () => useContext(PageTransitionContext);
-
-
+// Moved to a separate hook file to avoid Fast Refresh errors
+const usePageTransition = () => useContext(PageTransitionContext);
 
 // Page transition wrapper
 const PageTransition = ({ children }: { children: React.ReactNode }) => {
@@ -106,26 +104,25 @@ function App() {
               <Navbar />
               <div className="flex-grow">
                 <AnimatePresence mode="wait">
-                    <PageTransition key={location}>
-                      <Switch>
-                        <Route path="/" component={Home} />
-                        <Route path="/forums" component={Forums} />
-                        <Route path="/forums/category/:categoryId" component={Forums} />
-                        <Route path="/thread/:id" component={ThreadDetail} />
-                        <Route path="/profile/:id" component={Profile} />
-                        <Route path="/profile/:id/edit" component={ProfileEdit} />
-                        <Route path="/new-thread" component={NewThread} />
-                        <Route path="/store" component={Store} />
-                        <Route path="/rewards" component={RewardsStore} />
-                        <Route path="/blog/new" component={NewBlogPost} />
-                        <Route path="/blog/:slug" component={BlogPost} />
-                        <Route path="/blog" component={Blog} />
-                        <Route path="/projects" component={Projects} />
-                        <Route path="*" component={NotFound} />
-                        <Route path="/" component={Home} />
-                      </Switch>
-                    </PageTransition>
-                  </AnimatePresence>
+                  <PageTransition key={location}>
+                    <Switch>
+                      <Route path="/" component={Home} />
+                      <Route path="/forums" component={Forums} />
+                      <Route path="/forums/category/:categoryId" component={Forums} />
+                      <Route path="/thread/:id" component={ThreadDetail} />
+                      <Route path="/profile/:id" component={Profile} />
+                      <Route path="/profile/:id/edit" component={ProfileEdit} />
+                      <Route path="/new-thread" component={NewThread} />
+                      <Route path="/store" component={Store} />
+                      <Route path="/rewards" component={RewardsStore} />
+                      <Route path="/blog/new" component={NewBlogPost} />
+                      <Route path="/blog/:slug" component={BlogPost} />
+                      <Route path="/blog" component={Blog} />
+                      <Route path="/projects" component={Projects} />
+                      <Route path="*" component={NotFound} />
+                    </Switch>
+                  </PageTransition>
+                </AnimatePresence>
               </div>
               <Footer />
               <AccessibilityMenu />
