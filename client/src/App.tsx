@@ -7,6 +7,7 @@ import { AccessibilityProvider } from "./lib/accessibility-context";
 import { AccessibilityMenu } from "./components/accessibility/accessibility-menu";
 import { useEffect, useState, createContext, useContext } from "react";
 import { AnimatePresence, motion } from "framer-motion";
+import { ProtectedRoute, PublicOrProtectedRoute } from "./lib/protected-route";
 
 // Components
 import Navbar from "./components/navbar";
@@ -26,6 +27,7 @@ import Blog from "@/pages/blog";
 import BlogPost from "@/pages/blog-post";
 import NewBlogPost from "@/pages/blog-new";
 import Projects from "@/pages/projects";
+import AuthPage from "@/pages/auth-page";
 
 // Page transition context
 interface PageTransitionContextType {
@@ -107,18 +109,19 @@ function App() {
                   <PageTransition key={location}>
                     <Switch>
                       <Route path="/" component={Home} />
-                      <Route path="/forums" component={Forums} />
-                      <Route path="/forums/category/:categoryId" component={Forums} />
-                      <Route path="/thread/:id" component={ThreadDetail} />
-                      <Route path="/profile/:id" component={Profile} />
-                      <Route path="/profile/:id/edit" component={ProfileEdit} />
-                      <Route path="/new-thread" component={NewThread} />
-                      <Route path="/store" component={Store} />
-                      <Route path="/rewards" component={RewardsStore} />
-                      <Route path="/blog/new" component={NewBlogPost} />
-                      <Route path="/blog/:slug" component={BlogPost} />
-                      <Route path="/blog" component={Blog} />
-                      <Route path="/projects" component={Projects} />
+                      <Route path="/auth" component={AuthPage} />
+                      <ProtectedRoute path="/forums" component={Forums} />
+                      <ProtectedRoute path="/forums/category/:categoryId" component={Forums} />
+                      <ProtectedRoute path="/thread/:id" component={ThreadDetail} />
+                      <ProtectedRoute path="/profile/:id" component={Profile} />
+                      <ProtectedRoute path="/profile/:id/edit" component={ProfileEdit} />
+                      <ProtectedRoute path="/new-thread" component={NewThread} />
+                      <ProtectedRoute path="/store" component={Store} />
+                      <ProtectedRoute path="/rewards" component={RewardsStore} />
+                      <ProtectedRoute path="/blog/new" component={NewBlogPost} />
+                      <ProtectedRoute path="/blog/:slug" component={BlogPost} />
+                      <ProtectedRoute path="/blog" component={Blog} />
+                      <ProtectedRoute path="/projects" component={Projects} />
                       <Route path="*" component={NotFound} />
                     </Switch>
                   </PageTransition>
