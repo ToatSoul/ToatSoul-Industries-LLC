@@ -38,6 +38,7 @@ import {
 import { FileUpload } from "@/components/forum/file-upload";
 import { AlertCircle } from "lucide-react";
 import { Alert, AlertDescription, AlertTitle } from "@/components/ui/alert";
+import { useRoute } from "wouter";
 import { Checkbox } from "@/components/ui/checkbox";
 
 // Schema for thread creation
