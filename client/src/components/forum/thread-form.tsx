@@ -93,14 +93,12 @@ export function ThreadForm() {
     
     try {
       // Create thread
-      const response = await apiRequest("POST", "/api/threads", {
+      const thread = await apiRequest("POST", "/api/threads", {
         title: data.title,
         content: data.content,
         categoryId: parseInt(data.categoryId, 10),
         tagIds: data.tagIds?.map(id => parseInt(id, 10)) || [],
       });
-      
-      const thread = await response.json();
       
       // Upload files if any
       if (files.length > 0) {
